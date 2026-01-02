@@ -8,7 +8,7 @@
 /**
  * LLM provider type
  */
-export type LLMProvider = 'anthropic' | 'openai';
+export type LLMProvider = 'anthropic' | 'openai' | 'ollama';
 
 /**
  * Log level
@@ -87,6 +87,7 @@ export type PartialConfig = Partial<Config>;
 export interface EnvVars {
   ANTHROPIC_API_KEY?: string;
   OPENAI_API_KEY?: string;
+  OLLAMA_BASE_URL?: string;
   DEFAULT_LLM_PROVIDER?: string;
   DEFAULT_MODEL?: string;
   MAX_TOKENS?: string;

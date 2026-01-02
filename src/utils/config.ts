@@ -65,6 +65,18 @@ export async function loadConfig(): Promise<Config> {
     if (apiKey) {
       config.apiKey = apiKey;
     }
+  } else if (config.llmProvider === 'ollama') {
+    // Ollama doesn't require an API key
+    config.apiKey = '';
+
+    // Get Ollama base URL
+    const baseUrl = getEnv('OLLAMA_BASE_URL');
+    if (baseUrl) {
+      config.providerOptions = {
+        ...config.providerOptions,
+        baseUrl,
+      };
+    }
   }
 
   // Parse numeric values
@@ -104,12 +116,12 @@ export async function loadConfig(): Promise<Config> {
     config.logLevel = logLevel as Config['logLevel'];
   }
 
-  // Validate API key
-  if (!config.apiKey) {
+  // Validate API key (not required for Ollama)
+  if (!config.apiKey && config.llmProvider !== 'ollama') {
+    const keyName = config.llmProvider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY';
     throw new Error(
       `No API key found for provider "${config.llmProvider}". ` +
-      `Please set ${config.llmProvider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY'} ` +
-      `environment variable or add it to ${CONFIG_FILE}`
+      `Please set ${keyName} environment variable or add it to ${CONFIG_FILE}`
     );
   }
 

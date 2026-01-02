@@ -7,6 +7,7 @@
 import { LLMClient } from './base.js';
 import { AnthropicClient } from './anthropic.js';
 import { OpenAIClient } from './openai.js';
+import { OllamaClient } from './ollama.js';
 import type { Config } from '../../types/index.js';
 
 /**
@@ -34,10 +35,19 @@ export function createLLMClient(config: Config): LLMClient {
         config.temperature
       );
 
+    case 'ollama':
+      return new OllamaClient(
+        '', // Ollama doesn't require an API key
+        config.model,
+        config.maxTokens,
+        config.temperature,
+        config.providerOptions?.baseUrl as string | undefined
+      );
+
     default:
       throw new Error(
         `Unknown LLM provider: ${config.llmProvider}. ` +
-        `Supported providers: anthropic, openai`
+        `Supported providers: anthropic, openai, ollama`
       );
   }
 }
@@ -76,4 +86,22 @@ export function createOpenAIClient(
   temperature = 0.7
 ): OpenAIClient {
   return new OpenAIClient(apiKey, model, maxTokens, temperature);
+}
+
+/**
+ * Create an Ollama client directly
+ *
+ * @param model - Model name
+ * @param maxTokens - Max tokens
+ * @param temperature - Temperature
+ * @param baseUrl - Ollama base URL
+ * @returns Ollama client
+ */
+export function createOllamaClient(
+  model = 'llama3.2',
+  maxTokens = 4096,
+  temperature = 0.7,
+  baseUrl = 'http://localhost:11434'
+): OllamaClient {
+  return new OllamaClient('', model, maxTokens, temperature, baseUrl);
 }

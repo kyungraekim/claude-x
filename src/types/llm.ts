@@ -94,4 +94,10 @@ export interface ProviderTool {
   description: string;
   input_schema?: Record<string, unknown>; // Anthropic format
   parameters?: Record<string, unknown>;   // OpenAI format
+  type?: string;                          // Ollama format
+  function?: {                            // Ollama format
+    name: string;
+    description: string;
+    parameters: Record<string, unknown>;
+  };
 }
