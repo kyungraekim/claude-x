@@ -11,6 +11,9 @@ import type { Agent } from '../../core/agent/agent.js';
 import type { AgentEvent, ToolCall, ToolResult } from '../../types/index.js';
 import { Message } from './Message.js';
 import { ToolExecution } from './ToolExecution.js';
+import { parseSlashCommand } from '../../utils/command-parser.js';
+import { CommandRegistry, ExportCommand } from '../../core/commands/index.js';
+import type { CommandContext } from '../../types/command.js';
 
 export interface ChatProps {
   agent: Agent;
@@ -39,6 +42,11 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentTools, setCurrentTools] = useState<ToolExec[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
+  const [commandRegistry] = useState(() => {
+    const registry = new CommandRegistry();
+    registry.register(ExportCommand);
+    return registry;
+  });
 
   // Process agent events
   const processMessage = async (userMessage: string) => {
@@ -48,7 +56,56 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
     setIsProcessing(true);
     setCurrentTools([]);
 
-    // Add user message
+    // Parse for slash commands
+    const parsed = parseSlashCommand(userMessage);
+
+    if (parsed.isCommand && parsed.command) {
+      // Handle slash command
+      try {
+        const commandContext: CommandContext = {
+          agent,
+          setMessages,
+          setStatusMessage,
+        };
+
+        const result = await commandRegistry.execute(
+          parsed.command,
+          parsed.args,
+          commandContext,
+        );
+
+        if (result.success) {
+          setStatusMessage(result.message);
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'system',
+              content: result.message,
+            },
+          ]);
+          // Clear status after 3 seconds
+          setTimeout(() => setStatusMessage(''), 3000);
+        } else {
+          setStatusMessage(`Error: ${result.error}`);
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'system',
+              content: `Error: ${result.error}`,
+            },
+          ]);
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        setStatusMessage(`Command error: ${errorMsg}`);
+      } finally {
+        setIsProcessing(false);
+        setCurrentTools([]);
+      }
+      return;
+    }
+
+    // Not a command - proceed with normal agent processing
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
 
     try {

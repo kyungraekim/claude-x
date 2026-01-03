@@ -38,8 +38,9 @@ export const DEFAULT_SKILLS_DIR = join(CONFIG_DIR, 'skills');
 
 /**
  * Default outputs directory
+ * Uses current working directory for easy access to exported files
  */
-export const DEFAULT_OUTPUTS_DIR = join(CONFIG_DIR, 'outputs');
+export const DEFAULT_OUTPUTS_DIR = join(process.cwd(), 'outputs');
 
 /**
  * Default configuration

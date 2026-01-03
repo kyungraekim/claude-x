@@ -196,6 +196,59 @@ for await (const event of agent.run(userMessage)) {
 - Clear error messages to LLM
 - Graceful degradation
 
+### 6. Slash Command System (UI Commands)
+
+**Problem**: Need UI-level commands that execute instantly without LLM processing.
+
+**Solution**: Command registry intercepts slash commands in Chat component before agent execution.
+
+**Pattern**:
+```typescript
+// In Chat.tsx
+const parsed = parseSlashCommand(userMessage);
+if (parsed.isCommand) {
+  const result = await commandRegistry.execute(
+    parsed.command,
+    parsed.args,
+    { agent, setMessages, setStatusMessage }
+  );
+  // Display result immediately
+}
+```
+
+**Implementation**:
+1. **Command Parser** (`src/utils/command-parser.ts`): Detects `/command` patterns
+2. **Command Registry** (`src/core/commands/registry.ts`): Manages command registration and execution
+3. **Commands** (`src/core/commands/*.ts`): Implement `SlashCommand` interface
+4. **Chat Integration** (`src/ui/components/Chat.tsx`): Intercepts before agent
+
+**Benefits**:
+- No token usage (free, instant)
+- Direct UI manipulation (clear messages, export files, etc.)
+- Extensible (easy to add new commands)
+- Follows existing registry pattern
+- Clear separation: UI commands vs Agent tools
+
+**Current Commands**:
+- `/export` - Export conversation history to markdown file
+
+**Adding New Commands**:
+```typescript
+// 1. Create command file
+export const MyCommand: SlashCommand = {
+  name: 'mycommand',
+  description: 'Does something useful',
+  usage: '/mycommand [args]',
+  async execute(args, context) {
+    // Implementation
+    return { success: true, message: 'Done!' };
+  }
+};
+
+// 2. Register in Chat.tsx
+registry.register(MyCommand);
+```
+
 ## Code Conventions
 
 ### TypeScript

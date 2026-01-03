@@ -110,6 +110,25 @@ claude-x init
 
 Sets up configuration files and default skills in `~/.claude-x/`.
 
+## Commands
+
+During a chat session, you can use slash commands for special actions:
+
+### `/export`
+
+Save your conversation history to a markdown file.
+
+```bash
+# Simply type in the chat:
+/export
+```
+
+- **Output format**: Markdown with metadata (date, model, token usage)
+- **Location**: `./outputs/conversation-{timestamp}.md` (current working directory)
+- **Content**: All user and assistant messages (system prompts excluded)
+
+Example: The file `outputs/conversation-2026-01-04T12-34-56.md` will be created in your current directory.
+
 ## Configuration
 
 Configuration is loaded from multiple sources (in order of priority):
@@ -284,16 +303,28 @@ The agent automatically detects the platform and adjusts tool behavior according
 
 The following features are marked as TODOs in the codebase:
 
+### High Priority
 - [ ] Rate limiting and retry logic for LLM API calls
 - [ ] Conversation history pruning and token management
 - [ ] Tool sandboxing and security restrictions
 - [ ] Streaming LLM responses in terminal UI
+
+### Medium Priority
 - [ ] Parallel tool execution
 - [ ] Advanced error recovery
 - [ ] Skill hot-reloading
 - [ ] Conversation persistence (save/load)
 - [ ] Plugin system for third-party tools
 - [ ] Interactive config management UI
+
+### Slash Commands (Extensibility)
+- [ ] Add `/help` command to show available slash commands
+- [ ] Add `/reset` or `/clear` command to clear conversation history
+- [ ] Support additional export formats (JSON, plain text, HTML)
+- [ ] Add `/save` as an alias for `/export`
+- [ ] Implement command auto-completion when typing `/`
+- [ ] Add export filtering (date range, last N messages, etc.)
+- [ ] Support exporting to cloud services (GitHub Gist, Pastebin)
 
 ## Contributing
 
