@@ -52,7 +52,7 @@ temp/
 *.tmp
 
 # Config
-.claude-code-ts/
+.claude-x/
 
 # Keep example files
 !examples/**/*.js

@@ -4,7 +4,7 @@
  * Loads configuration from multiple sources with precedence:
  * 1. Environment variables (highest priority)
  * 2. .env file in current directory
- * 3. Config file in ~/.claude-code-ts/config.json
+ * 3. Config file in ~/.claude-x/config.json
  * 4. Default values (lowest priority)
  */
 
@@ -165,11 +165,11 @@ export async function saveConfig(config: PartialConfig): Promise<void> {
  * Initialize config directory and files
  *
  * Creates:
- * - ~/.claude-code-ts/ directory
- * - ~/.claude-code-ts/workspace/ directory
- * - ~/.claude-code-ts/skills/ directory
- * - ~/.claude-code-ts/outputs/ directory
- * - ~/.claude-code-ts/config.json (if doesn't exist)
+ * - ~/.claude-x/ directory
+ * - ~/.claude-x/workspace/ directory
+ * - ~/.claude-x/skills/ directory
+ * - ~/.claude-x/outputs/ directory
+ * - ~/.claude-x/config.json (if doesn't exist)
  *
  * @throws Error if directories can't be created
  */

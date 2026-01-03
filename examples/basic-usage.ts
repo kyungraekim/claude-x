@@ -1,7 +1,7 @@
 /**
  * Basic usage example
  *
- * Demonstrates programmatic usage of claude-code-ts without the CLI.
+ * Demonstrates programmatic usage of claude-x without the CLI.
  */
 
 import { Agent } from '../src/core/agent/agent.js';

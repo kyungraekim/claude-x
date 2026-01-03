@@ -1,10 +1,10 @@
-# CLAUDE.md - Development Guide for claude-code-ts
+# CLAUDE.md - Development Guide for claude-x
 
 This document provides context for AI assistants (like Claude) and developers working on this codebase.
 
 ## Project Overview
 
-**claude-code-ts** is a TypeScript-based AI coding agent CLI tool built with Bun, designed specifically for ML training environments. It features:
+**claude-x** is a TypeScript-based AI coding agent CLI tool built with Bun, designed specifically for ML training environments. It features:
 
 - Multi-provider LLM support (Anthropic Claude, OpenAI GPT)
 - Cross-platform compatibility (Windows PowerShell, macOS/Linux bash)

@@ -2,7 +2,7 @@
 /**
  * CLI entry point
  *
- * Main command-line interface for claude-code-ts.
+ * Main command-line interface for claude-x.
  */
 
 import React from 'react';
@@ -35,7 +35,7 @@ import { SYSTEM_PROMPTS } from './constants.js';
  */
 async function main() {
   program
-    .name('claude-code-ts')
+    .name('claude-x')
     .description('TypeScript-based AI coding agent CLI tool for ML training environments')
     .version('1.0.0');
 
@@ -46,19 +46,19 @@ async function main() {
     .command('init')
     .description('Initialize configuration and skills directories')
     .action(async () => {
-      console.log(chalk.cyan('Initializing claude-code-ts...'));
+      console.log(chalk.cyan('Initializing claude-x...'));
 
       try {
         await initializeConfig();
         console.log(chalk.green('✓ Configuration initialized'));
-        console.log(chalk.gray('  Config directory: ~/.claude-code-ts/'));
-        console.log(chalk.gray('  Workspace: ~/.claude-code-ts/workspace/'));
-        console.log(chalk.gray('  Skills: ~/.claude-code-ts/skills/'));
-        console.log(chalk.gray('  Outputs: ~/.claude-code-ts/outputs/'));
+        console.log(chalk.gray('  Config directory: ~/.claude-x/'));
+        console.log(chalk.gray('  Workspace: ~/.claude-x/workspace/'));
+        console.log(chalk.gray('  Skills: ~/.claude-x/skills/'));
+        console.log(chalk.gray('  Outputs: ~/.claude-x/outputs/'));
         console.log();
         console.log(chalk.yellow('Next steps:'));
         console.log(chalk.gray('  1. Set your API key in environment or .env file'));
-        console.log(chalk.gray('  2. Run: claude-code-ts chat'));
+        console.log(chalk.gray('  2. Run: claude-x chat'));
       } catch (error) {
         console.error(chalk.red('Failed to initialize:'), error);
         process.exit(1);

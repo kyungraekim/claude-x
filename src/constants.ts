@@ -24,7 +24,7 @@ export const CURRENT_PLATFORM: Platform = detectPlatform();
 /**
  * Default configuration directory
  */
-export const CONFIG_DIR = join(homedir(), '.claude-code-ts');
+export const CONFIG_DIR = join(homedir(), '.claude-x');
 
 /**
  * Default workspace directory

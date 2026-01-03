@@ -1,4 +1,4 @@
-# claude-code-ts
+# claude-x
 
 A TypeScript-based AI coding agent CLI tool built with Bun, designed for ML training environments. Features a skills-based system for different computing environments (local, Slurm, Kubernetes) and supports multiple LLM providers.
 
@@ -51,7 +51,7 @@ A TypeScript-based AI coding agent CLI tool built with Bun, designed for ML trai
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd claude-code-ts
+cd claude-x
 
 # Install dependencies
 bun install
@@ -67,13 +67,13 @@ bun run build
 bun link
 
 # Run
-claude-code-ts chat
+claude-x chat
 ```
 
 ### Install globally (when published)
 
 ```bash
-bun install -g claude-code-ts
+bun install -g claude-x
 ```
 
 ## Quick Start
@@ -81,7 +81,7 @@ bun install -g claude-code-ts
 ### Interactive Chat
 
 ```bash
-claude-code-ts chat
+claude-x chat
 ```
 
 Starts an interactive chat session with the AI agent. The agent has access to tools for file operations, shell commands, and more.
@@ -89,7 +89,7 @@ Starts an interactive chat session with the AI agent. The agent has access to to
 ### One-Shot Task
 
 ```bash
-claude-code-ts run "create a Python training script for MNIST"
+claude-x run "create a Python training script for MNIST"
 ```
 
 Execute a single task and exit.
@@ -97,7 +97,7 @@ Execute a single task and exit.
 ### Training Mode
 
 ```bash
-claude-code-ts train "train a ResNet model on ImageNet with 4 GPUs"
+claude-x train "train a ResNet model on ImageNet with 4 GPUs"
 ```
 
 Activates training-specific skills and guides based on your environment (local, Slurm, Kubernetes).
@@ -105,10 +105,10 @@ Activates training-specific skills and guides based on your environment (local, 
 ### Initialize Configuration
 
 ```bash
-claude-code-ts init
+claude-x init
 ```
 
-Sets up configuration files and default skills in `~/.claude-code-ts/`.
+Sets up configuration files and default skills in `~/.claude-x/`.
 
 ## Configuration
 
@@ -116,7 +116,7 @@ Configuration is loaded from multiple sources (in order of priority):
 
 1. Environment variables
 2. `.env` file in project root
-3. `~/.claude-code-ts/config.json`
+3. `~/.claude-x/config.json`
 4. Default values
 
 ### Key Configuration Options
@@ -162,7 +162,7 @@ You are helping with local ML training.
 
 ### Creating Custom Skills
 
-1. Create a markdown file in `~/.claude-code-ts/skills/`
+1. Create a markdown file in `~/.claude-x/skills/`
 2. Add metadata using HTML comments
 3. Use `{{VARIABLE}}` syntax for dynamic content
 
@@ -215,7 +215,7 @@ Search files for patterns.
 ### Project Structure
 
 ```
-claude-code-ts/
+claude-x/
 ├── src/
 │   ├── cli.tsx              # CLI entry point
 │   ├── constants.ts         # Default values
