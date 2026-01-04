@@ -51,3 +51,10 @@ export type {
   AgentEvent,
   AgentExecutionOptions,
 } from './agent.js';
+
+// ANSI types
+export type {
+  AnsiPixel,
+  AnsiPixelRow,
+  AnsiImage
+} from './ansi-image.js';

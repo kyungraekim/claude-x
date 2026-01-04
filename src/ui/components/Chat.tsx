@@ -4,16 +4,18 @@
  * Main interactive chat interface.
  */
 
-import React, { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
 import TextInput from 'ink-text-input';
+import React, { useEffect, useState } from 'react';
 import type { Agent } from '../../core/agent/agent.js';
-import type { AgentEvent, ToolCall, ToolResult } from '../../types/index.js';
-import { Message } from './Message.js';
-import { ToolExecution } from './ToolExecution.js';
-import { parseSlashCommand } from '../../utils/command-parser.js';
 import { CommandRegistry, ExportCommand } from '../../core/commands/index.js';
 import type { CommandContext } from '../../types/command.js';
+import type { AgentEvent, ToolCall, ToolResult } from '../../types/index.js';
+import { parseSlashCommand } from '../../utils/command-parser.js';
+import { LOGO_IMAGE } from '../assets/images/logo.image.js';
+import { AnsiImageView } from './AnsiImageView.js';
+import { Message } from './Message.js';
+import { ToolExecution } from './ToolExecution.js';
 
 export interface ChatProps {
   agent: Agent;
@@ -191,8 +193,9 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
     <Box flexDirection="column" padding={1}>
       {/* Header */}
       <Box marginBottom={1} borderStyle="round" borderColor="cyan" padding={1}>
+        <AnsiImageView image={LOGO_IMAGE} />
         <Text bold color="cyan">
-          Claude Code TS - AI Coding Agent
+          Claude X
         </Text>
       </Box>
 
