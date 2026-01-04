@@ -16,6 +16,7 @@ import { LOGO_IMAGE } from '../assets/images/logo.image.js';
 import { AnsiImageView } from './AnsiImageView.js';
 import { Message } from './Message.js';
 import { ToolExecution } from './ToolExecution.js';
+import { AnimatedStatus } from './AnimatedStatus.js';
 
 export interface ChatProps {
   agent: Agent;
@@ -223,9 +224,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
       {/* Status */}
       {statusMessage && (
         <Box marginBottom={1}>
-          <Text dimColor italic>
-            {statusMessage}
-          </Text>
+          <AnimatedStatus message={statusMessage} statusType="default" />
         </Box>
       )}
 
@@ -243,7 +242,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
 
       {isProcessing && (
         <Box>
-          <Text dimColor>Processing...</Text>
+          <AnimatedStatus message="Processing..." statusType="default" />
         </Box>
       )}
     </Box>
