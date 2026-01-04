@@ -13,10 +13,10 @@ import type { CommandContext } from '../../types/command.js';
 import type { AgentEvent, ToolCall, ToolResult } from '../../types/index.js';
 import { parseSlashCommand } from '../../utils/command-parser.js';
 import { LOGO_IMAGE } from '../assets/images/logo.image.js';
+import { AnimatedStatus } from './AnimatedStatus.js';
 import { AnsiImageView } from './AnsiImageView.js';
 import { Message } from './Message.js';
 import { ToolExecution } from './ToolExecution.js';
-import { AnimatedStatus } from './AnimatedStatus.js';
 
 export interface ChatProps {
   agent: Agent;
@@ -45,6 +45,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentTools, setCurrentTools] = useState<ToolExec[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
+  const [currentStatusType, setCurrentStatusType] = useState<'thinking' | 'executing' | 'iterating' | 'done' | 'error' | 'default'>('default');
   const [commandRegistry] = useState(() => {
     const registry = new CommandRegistry();
     registry.register(ExportCommand);
@@ -104,6 +105,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
       } finally {
         setIsProcessing(false);
         setCurrentTools([]);
+        setCurrentStatusType('default');
       }
       return;
     }
@@ -123,6 +125,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
       setIsProcessing(false);
       setCurrentTools([]);
       setStatusMessage('');
+      setCurrentStatusType('default');
     }
   };
 
@@ -130,7 +133,8 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
   const handleEvent = async (event: AgentEvent) => {
     switch (event.type) {
       case 'llm_start':
-        setStatusMessage('Thinking...');
+        setStatusMessage('Thinking');
+        setCurrentStatusType('thinking');
         break;
 
       case 'llm_response':
@@ -141,6 +145,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
 
       case 'tool_start':
         setStatusMessage(`Executing tool: ${event.toolCall.name}`);
+        setCurrentStatusType('executing');
         setCurrentTools((prev) => [
           ...prev,
           { toolCall: event.toolCall, isExecuting: true },
@@ -159,14 +164,17 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
 
       case 'iteration':
         setStatusMessage(`Iteration ${event.count}`);
+        setCurrentStatusType('iterating');
         break;
 
       case 'done':
         setStatusMessage('Done');
+        setCurrentStatusType('done');
         break;
 
       case 'error':
         setStatusMessage(`Error: ${event.error}`);
+        setCurrentStatusType('error');
         setMessages((prev) => [
           ...prev,
           { role: 'system', content: `Error: ${event.error}` },
@@ -224,7 +232,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
       {/* Status */}
       {statusMessage && (
         <Box marginBottom={1}>
-          <AnimatedStatus message={statusMessage} statusType="default" />
+          <AnimatedStatus message={statusMessage} statusType={currentStatusType} />
         </Box>
       )}
 
