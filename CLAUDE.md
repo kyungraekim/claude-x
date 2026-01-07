@@ -14,10 +14,26 @@ This document provides context for AI assistants (like Claude) and developers wo
 
 ## Architecture Overview
 
+### Monorepo Structure
+
+This project uses Bun workspaces with two packages:
+
+```
+claude-x/
+├── packages/
+│   ├── core/           # @claude-x/core - Agent, LLM clients, tools, utilities
+│   └── cli/            # @claude-x/cli  - Terminal UI (ink/React)
+├── skills/             # Shared skills (markdown)
+├── package.json        # Workspace root
+└── tsconfig.json       # Project references
+```
+
+### Component Architecture
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                   CLI Entry Point                    │
-│                   (src/cli.tsx)                      │
+│              (packages/cli/src/index.tsx)            │
 └──────────────────────┬──────────────────────────────┘
                        │
          ┌─────────────┼─────────────┐
@@ -26,7 +42,10 @@ This document provides context for AI assistants (like Claude) and developers wo
     │   UI    │   │ Agent  │   │ Skills  │
     │ (ink)   │   │  Loop  │   │ System  │
     └─────────┘   └───┬────┘   └─────────┘
+         │            │             │
+         └────────────┼─────────────┘
                       │
+              @claude-x/core
               ┌───────┼───────┐
               │       │       │
          ┌────▼──┐ ┌─▼────┐ ┌▼─────┐
@@ -509,26 +528,61 @@ bun run typecheck
 
 ## File Organization
 
+### Monorepo Layout
+
 ```
-src/
-├── cli.tsx              # Entry point, CLI commands
-├── constants.ts         # App-wide constants
-├── types/               # TypeScript type definitions
-├── utils/               # Cross-platform utilities
-├── core/
-│   ├── llm/            # LLM client implementations
-│   ├── tools/          # Tool registry
-│   ├── skills/         # Skills system
-│   └── agent/          # Agentic loop
-├── tools/              # Built-in tool implementations
-└── ui/                 # Terminal UI components
+claude-x/
+├── package.json              # Workspace root (private: true, workspaces)
+├── tsconfig.json             # Project references
+├── tsconfig.base.json        # Shared TypeScript config
+├── CLAUDE.md                 # This file
+│
+├── packages/
+│   ├── core/                 # @claude-x/core
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── src/
+│   │       ├── index.ts      # Public API exports
+│   │       ├── agent/        # Agent class, context management
+│   │       ├── llm/          # LLM client implementations
+│   │       ├── tools/        # Tool registry + builtin tools
+│   │       ├── skills/       # Skills system
+│   │       ├── export/       # Export functionality
+│   │       ├── types/        # Type definitions
+│   │       └── utils/        # Platform utilities
+│   │
+│   └── cli/                  # @claude-x/cli
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── src/
+│           ├── index.tsx     # CLI entry point
+│           ├── constants.ts  # System prompts
+│           ├── commands/     # Slash command system
+│           ├── types/        # CLI-specific types
+│           └── ui/           # ink/React components
+│
+├── skills/                   # Shared markdown skills
+│   ├── train-local.md
+│   ├── train-slurm.md
+│   └── train-kubernetes.md
+│
+└── src/                      # (Legacy - to be removed)
 ```
 
+### Package Responsibilities
+
+**@claude-x/core** - No UI dependencies, can be used programmatically:
+- Agent, LLM clients, tools, utilities
+- Can be imported by CLI, GUI, or custom integrations
+
+**@claude-x/cli** - Terminal UI with ink/React:
+- Depends on `@claude-x/core`
+- ink components, CLI commands, slash commands
+
 **Rationale**:
-- `core/` - Core abstractions (registry, base classes)
-- `tools/` - Concrete tool implementations
-- `utils/` - Shared utilities
-- `types/` - Type-only files (imported everywhere)
+- Separation enables future GUI package
+- Core can be used as a library
+- CLI owns all terminal-specific code
 
 ## Testing Strategy
 
