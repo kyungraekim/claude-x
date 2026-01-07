@@ -58,7 +58,7 @@ claude-x/
 
 These five files form the backbone of the system. Understanding them is key to understanding the entire architecture:
 
-### 1. `src/types/tool.ts` - Tool Interface
+### 1. `packages/core/src/types/tool.ts` - Tool Interface
 
 **Purpose**: Defines the contract for all tools in the system.
 
@@ -81,7 +81,7 @@ const MyTool: Tool = {
 };
 ```
 
-### 2. `src/core/llm/base.ts` - LLM Client Abstraction
+### 2. `packages/core/src/llm/base.ts` - LLM Client Abstraction
 
 **Purpose**: Provider-agnostic interface for LLM interactions.
 
@@ -93,7 +93,7 @@ const MyTool: Tool = {
 
 **Why it matters**: Adding a new LLM provider means extending this class and implementing the abstract methods. The rest of the system doesn't need to know about provider differences.
 
-### 3. `src/core/agent/agent.ts` - Agentic Loop
+### 3. `packages/core/src/agent/agent.ts` - Agentic Loop
 
 **Purpose**: The "brain" - orchestrates LLM calls, tool execution, and iteration.
 
@@ -115,7 +115,7 @@ const MyTool: Tool = {
 
 **Why it matters**: This is where the magic happens. The agent decides when to use tools, when to stop, and manages the entire conversation flow.
 
-### 4. `src/utils/shell.ts` - Cross-Platform Execution
+### 4. `packages/core/src/utils/shell.ts` - Cross-Platform Execution
 
 **Purpose**: Handles Windows vs Unix shell differences.
 
@@ -127,7 +127,7 @@ const MyTool: Tool = {
 
 **Why it matters**: The bash tool is one of the most powerful capabilities. Getting cross-platform shell execution right is critical for the entire system to work on all platforms.
 
-### 5. `src/cli.tsx` - Entry Point
+### 5. `packages/cli/src/index.tsx` - Entry Point
 
 **Purpose**: Wires everything together and provides CLI commands.
 
@@ -236,10 +236,10 @@ if (parsed.isCommand) {
 ```
 
 **Implementation**:
-1. **Command Parser** (`src/utils/command-parser.ts`): Detects `/command` patterns
-2. **Command Registry** (`src/core/commands/registry.ts`): Manages command registration and execution
-3. **Commands** (`src/core/commands/*.ts`): Implement `SlashCommand` interface
-4. **Chat Integration** (`src/ui/components/Chat.tsx`): Intercepts before agent
+1. **Command Parser** (`packages/cli/src/commands/command-parser.ts`): Detects `/command` patterns
+2. **Command Registry** (`packages/cli/src/commands/registry.ts`): Manages command registration and execution
+3. **Commands** (`packages/cli/src/commands/*.ts`): Implement `SlashCommand` interface
+4. **Chat Integration** (`packages/cli/src/ui/components/Chat.tsx`): Intercepts before agent
 
 **Benefits**:
 - No token usage (free, instant)
@@ -306,10 +306,10 @@ registry.register(MyCommand);
 
 ### Adding a New Tool
 
-1. Create file in `src/tools/` (e.g., `my-tool.ts`)
+1. Create file in `packages/core/src/tools/builtin/` (e.g., `my-tool.ts`)
 2. Define Zod schema for inputs
 3. Implement `Tool` interface with `execute()` method
-4. Export from `src/tools/index.ts` and add to `getDefaultTools()`
+4. Export from `packages/core/src/tools/builtin/index.ts` and add to `getDefaultTools()`
 5. Test manually or add to `tests/tools/`
 
 **Example**:
@@ -354,14 +354,14 @@ export const MyTool: Tool = {
 
 ### Adding a New LLM Provider
 
-1. Create file in `src/core/llm/` (e.g., `my-provider.ts`)
+1. Create file in `packages/core/src/llm/` (e.g., `my-provider.ts`)
 2. Extend `LLMClient` base class
 3. Implement abstract methods:
    - `sendMessage()`
    - `streamMessage()`
    - `convertToolsToProviderFormat()`
-4. Add to factory in `src/core/llm/factory.ts`
-5. Update `LLMProvider` type in `src/types/config.ts`
+4. Add to factory in `packages/core/src/llm/factory.ts`
+5. Update `LLMProvider` type in `packages/core/src/types/config.ts`
 
 ### Testing
 
@@ -384,17 +384,17 @@ bun run typecheck
 
 ### High Priority
 
-1. **Streaming LLM Responses** (`src/core/llm/anthropic.ts`, `openai.ts`)
+1. **Streaming LLM Responses** (`packages/core/src/llm/anthropic.ts`, `openai.ts`)
    - Currently falls back to non-streaming
    - Need to properly implement AsyncGenerator streaming
    - Update UI to handle streaming chunks
 
-2. **Conversation History Pruning** (`src/core/agent/agent.ts`)
+2. **Conversation History Pruning** (`packages/core/src/agent/agent.ts`)
    - Agent state grows unbounded
    - Need token counting and sliding window/summarization
    - Important for long conversations
 
-3. **Tool Sandboxing** (`src/tools/bash.ts`)
+3. **Tool Sandboxing** (`packages/core/src/tools/builtin/bash.ts`)
    - Bash tool can execute arbitrary commands
    - Add command allow/deny lists
    - Path restrictions
@@ -402,24 +402,24 @@ bun run typecheck
 
 ### Medium Priority
 
-4. **Rate Limiting and Retries** (`src/core/llm/base.ts`)
+4. **Rate Limiting and Retries** (`packages/core/src/llm/base.ts`)
    - Handle API rate limits
    - Exponential backoff on errors
    - Retry logic for transient failures
 
-5. **Parallel Tool Execution** (`src/core/tools/registry.ts`)
+5. **Parallel Tool Execution** (`packages/core/src/tools/registry.ts`)
    - Currently executes tools sequentially
    - Some tools could run in parallel
    - Need dependency analysis
 
-6. **Skill Hot-Reloading** (`src/core/skills/loader.ts`)
+6. **Skill Hot-Reloading** (`packages/core/src/skills/loader.ts`)
    - Watch skills directory for changes
    - Reload on file modification
    - Useful for development
 
 ### Low Priority
 
-7. **Conversation Persistence** (`src/core/agent/agent.ts`)
+7. **Conversation Persistence** (`packages/core/src/agent/agent.ts`)
    - Save/load conversation history
    - Resume previous sessions
 
@@ -455,7 +455,7 @@ bun run typecheck
 
 ### How to Add a CLI Command
 
-1. Add command in `src/cli.tsx`:
+1. Add command in `packages/cli/src/index.tsx`:
    ```typescript
    program
      .command('mycommand')
@@ -481,14 +481,14 @@ bun run typecheck
 2. Test shell commands:
    ```bash
    # Should work on all platforms
-   bun run src/cli.tsx run "list files"
+   bun run packages/cli/src/index.tsx run "list files"
    ```
 
 ### How to Add Environment Variables
 
 1. Add to `.env.example`
-2. Add to `EnvVars` type in `src/types/config.ts`
-3. Parse in `loadConfig()` in `src/utils/config.ts`
+2. Add to `EnvVars` type in `packages/core/src/types/config.ts`
+3. Parse in `loadConfig()` in `packages/core/src/utils/config.ts`
 4. Update README.md
 
 ## Architecture Decisions
@@ -561,12 +561,10 @@ claude-x/
 │           ├── types/        # CLI-specific types
 │           └── ui/           # ink/React components
 │
-├── skills/                   # Shared markdown skills
-│   ├── train-local.md
-│   ├── train-slurm.md
-│   └── train-kubernetes.md
-│
-└── src/                      # (Legacy - to be removed)
+└── skills/                   # Shared markdown skills
+    ├── train-local.md
+    ├── train-slurm.md
+    └── train-kubernetes.md
 ```
 
 ### Package Responsibilities
@@ -656,5 +654,5 @@ When working on this codebase, ask yourself:
 
 ---
 
-Last updated: 2026-01-02
-Version: 1.0.0 (Initial release)
+Last updated: 2026-01-08
+Version: 1.1.0 (Updated for monorepo refactoring)
