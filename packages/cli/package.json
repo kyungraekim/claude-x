@@ -1,0 +1,33 @@
+{
+  "name": "@claude-x/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Terminal UI for claude-x - ink/React CLI application",
+  "type": "module",
+  "bin": {
+    "claude-x": "src/index.tsx"
+  },
+  "scripts": {
+    "dev": "bun run src/index.tsx",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "build": "bun build src/index.tsx --outdir dist --target bun --format esm"
+  },
+  "dependencies": {
+    "@claude-x/core": "workspace:*",
+    "chalk": "^5.4.1",
+    "commander": "^12.1.0",
+    "ink": "^5.1.0",
+    "ink-spinner": "^5.0.0",
+    "ink-text-input": "^6.0.0",
+    "inquirer": "^12.3.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.18",
+    "bun-types": "^1.1.38",
+    "react-devtools-core": "^7.0.1",
+    "typescript": "^5.7.2"
+  }
+}
