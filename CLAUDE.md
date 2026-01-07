@@ -526,6 +526,40 @@ bun run typecheck
 - Works well with React state updates
 - Easy to add new event types
 
+## Coding Standards and Conventions
+
+This project follows strict coding standards enforced by automated tooling.
+
+### Documentation
+- [CODE_STYLE.md](./docs/CODE_STYLE.md) - Comprehensive style guide
+- [COMMIT_CONVENTION.md](./docs/COMMIT_CONVENTION.md) - Conventional commits
+- [CONTRIBUTING.md](./docs/CONTRIBUTING.md) - How to contribute
+
+### Tooling
+- **Prettier** - Code formatting (100 char line length, single quotes, trailing commas)
+- **ESLint** - Linting with TypeScript strict rules
+- **Bun test** - Testing framework (built-in)
+- **Husky** - Git hooks for pre-commit checks
+- **commitlint** - Commit message validation
+
+### Key Conventions
+- Files: `kebab-case` (e.g., `user-service.ts`)
+- Variables/Functions: `camelCase` (e.g., `executeCommand`)
+- Classes/Interfaces: `PascalCase` (e.g., `ToolRegistry`)
+- Constants: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_ATTEMPTS`)
+- No `any` type - use `unknown` or generics
+- JSDoc for all public APIs
+- Cross-platform support (Windows PowerShell + Unix bash)
+
+### Pre-commit Checks
+Once tooling is set up (see CONTRIBUTING.md), these run automatically:
+- Type checking (`bun run typecheck`)
+- Linting (`bun run lint`)
+- Formatting (`bun run format:check`)
+- Tests (`bun test`)
+
+See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for complete setup instructions.
+
 ## File Organization
 
 ### Monorepo Layout

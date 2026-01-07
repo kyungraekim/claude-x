@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+bun.lockb
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Cache
+.cache/
+.turbo/
+.eslintcache
+
+# Generated files
+*.min.js
+*.min.css
+
+# Environment
+.env
+.env.*
+
+# Monorepo
+packages/*/dist
+packages/*/build
+
+# Temp
+tmp-plans/
