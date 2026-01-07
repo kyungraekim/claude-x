@@ -1,18 +1,18 @@
 {
   "name": "claude-x",
   "version": "1.0.0",
+  "private": true,
   "description": "TypeScript-based AI coding agent CLI tool for ML training environments",
   "type": "module",
-  "bin": {
-    "claude-x": "./dist/cli.js"
-  },
+  "workspaces": ["packages/*"],
   "scripts": {
-    "dev": "bun run src/cli.tsx",
-    "build": "bun build src/cli.tsx --outdir dist --target bun --format esm",
-    "start": "bun run dist/cli.js",
-    "typecheck": "tsc --noEmit",
-    "test": "bun test",
-    "lint": "tsc --noEmit"
+    "dev": "bun run --cwd packages/cli dev",
+    "dev:legacy": "bun run src/cli.tsx",
+    "build": "bun run --filter '*' build",
+    "start": "bun run --cwd packages/cli dev",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun run --filter '*' test",
+    "lint": "bun run --filter '*' typecheck"
   },
   "keywords": [
     "ai",

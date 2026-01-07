@@ -1,45 +1,11 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    // Bun-specific configuration
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022"],
-
-    // Type checking
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-
-    // JSX for ink
+    // JSX for ink (needed at root level for legacy src)
     "jsx": "react-jsx",
     "jsxImportSource": "react",
 
-    // Module resolution
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-
-    // Emit
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist",
-    "removeComments": false,
-
-    // Path aliases for clean imports
+    // Path aliases for legacy src (during transition)
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -47,23 +13,22 @@
       "@/utils/*": ["src/utils/*"],
       "@/core/*": ["src/core/*"],
       "@/tools/*": ["src/tools/*"],
-      "@/ui/*": ["src/ui/*"]
-    },
-
-    // Skip lib check for faster compilation
-    "skipLibCheck": true,
-
-    // Types
-    "types": ["bun-types", "node"]
+      "@/ui/*": ["src/ui/*"],
+      "@claude-x/core": ["packages/core/src/index.ts"],
+      "@claude-x/core/*": ["packages/core/src/*"]
+    }
   },
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/cli" }
+  ],
   "include": [
     "src/**/*",
-    "tests/**/*",
-    "examples/**/*"
+    "tests/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "**/*.test.ts"
+    "packages"
   ]
 }
