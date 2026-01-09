@@ -57,3 +57,4 @@ temp/
 # Keep example files
 !examples/**/*.js
 !examples/**/*.ts
+!commitlint.config.js

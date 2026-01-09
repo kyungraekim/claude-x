@@ -4,7 +4,9 @@
   "private": true,
   "description": "TypeScript-based AI coding agent CLI tool for ML training environments",
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "bun run --cwd packages/cli dev",
     "dev:legacy": "bun run src/cli.tsx",
@@ -55,7 +57,9 @@
     "@types/which": "^3.0.4",
     "bun-types": "^1.1.38",
     "react-devtools-core": "^7.0.1",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.3.0"
   },
   "engines": {
     "bun": ">=1.0.0"
