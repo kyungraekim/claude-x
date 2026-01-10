@@ -6,6 +6,7 @@ bun.lockb
 dist/
 build/
 *.js
+!commitlint.config.js
 *.js.map
 *.d.ts
 *.d.ts.map
