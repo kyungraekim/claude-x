@@ -26,3 +26,6 @@ packages/*/build
 
 # Temp
 tmp-plans/
+
+# Large assets (ANSI ASCII art, etc.)
+packages/cli/src/ui/assets/images/logo.image.ts

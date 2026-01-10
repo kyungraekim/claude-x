@@ -63,21 +63,25 @@ These five files form the backbone of the system. Understanding them is key to u
 **Purpose**: Defines the contract for all tools in the system.
 
 **Key Concepts**:
+
 - Tools must implement the `Tool` interface
 - Input validation uses Zod schemas (runtime validation + auto JSON Schema generation)
 - Tools never throw - they always return `ToolResult` with success/error
 - Metadata field for additional context
 
 **Pattern**:
+
 ```typescript
 const MyTool: Tool = {
   name: 'my_tool',
   description: 'What this tool does',
-  inputSchema: z.object({ /* params */ }),
+  inputSchema: z.object({
+    /* params */
+  }),
   async execute(params) {
     // Validate, execute, return result
     return { success: true, output: '...' };
-  }
+  },
 };
 ```
 
@@ -86,6 +90,7 @@ const MyTool: Tool = {
 **Purpose**: Provider-agnostic interface for LLM interactions.
 
 **Key Concepts**:
+
 - Abstract base class that Anthropic/OpenAI clients extend
 - `sendMessage()` - non-streaming request/response
 - `streamMessage()` - streaming (TODO: implement properly)
@@ -98,6 +103,7 @@ const MyTool: Tool = {
 **Purpose**: The "brain" - orchestrates LLM calls, tool execution, and iteration.
 
 **The Agentic Loop**:
+
 ```
 1. Add user message
 2. Loop (until max iterations):
@@ -120,6 +126,7 @@ const MyTool: Tool = {
 **Purpose**: Handles Windows vs Unix shell differences.
 
 **Key Concepts**:
+
 - Windows: `powershell.exe -NoProfile -Command "..."`
 - Unix: `/bin/bash -c "..."`
 - Command escaping (different for PowerShell vs bash)
@@ -132,6 +139,7 @@ const MyTool: Tool = {
 **Purpose**: Wires everything together and provides CLI commands.
 
 **Key Concepts**:
+
 - Commander for CLI parsing
 - Creates LLM client, tool registry, skills, agent
 - Renders ink UI
@@ -148,6 +156,7 @@ const MyTool: Tool = {
 **Solution**: Abstract `LLMClient` base class with provider-specific implementations.
 
 **Benefits**:
+
 - Easy to add new providers (extend base class)
 - Agent doesn't care which provider is used
 - Normalized response format
@@ -159,6 +168,7 @@ const MyTool: Tool = {
 **Solution**: `ToolRegistry` stores tools in a Map and provides lookup/execution.
 
 **Benefits**:
+
 - Tools can be added/removed at runtime
 - Centralized validation (Zod schema parsing)
 - Error handling in one place
@@ -170,16 +180,19 @@ const MyTool: Tool = {
 **Solution**: Markdown files with metadata that get injected into system prompts.
 
 **Pattern**:
+
 ```markdown
 <!-- name: skill-name -->
 <!-- triggers: /train, train model -->
 <!-- environment: local -->
 
 # Skill Content
+
 {{WORKING_DIR}} - variable substitution
 ```
 
 **Benefits**:
+
 - Non-code configuration (easy to edit)
 - Auto-detection via triggers
 - Variable substitution for dynamic content
@@ -191,6 +204,7 @@ const MyTool: Tool = {
 **Solution**: Agent uses AsyncGenerator to yield events, UI consumes and updates state.
 
 **Pattern**:
+
 ```typescript
 for await (const event of agent.run(userMessage)) {
   if (event.type === 'llm_response') {
@@ -200,6 +214,7 @@ for await (const event of agent.run(userMessage)) {
 ```
 
 **Benefits**:
+
 - Decoupled agent logic from UI
 - Real-time feedback (spinners, progress)
 - Easy to add new event types
@@ -211,6 +226,7 @@ for await (const event of agent.run(userMessage)) {
 **Solution**: Tools return `ToolResult` (never throw), registry catches validation errors.
 
 **Benefits**:
+
 - Agent can continue after tool failures
 - Clear error messages to LLM
 - Graceful degradation
@@ -222,26 +238,29 @@ for await (const event of agent.run(userMessage)) {
 **Solution**: Command registry intercepts slash commands in Chat component before agent execution.
 
 **Pattern**:
+
 ```typescript
 // In Chat.tsx
 const parsed = parseSlashCommand(userMessage);
 if (parsed.isCommand) {
-  const result = await commandRegistry.execute(
-    parsed.command,
-    parsed.args,
-    { agent, setMessages, setStatusMessage }
-  );
+  const result = await commandRegistry.execute(parsed.command, parsed.args, {
+    agent,
+    setMessages,
+    setStatusMessage,
+  });
   // Display result immediately
 }
 ```
 
 **Implementation**:
+
 1. **Command Parser** (`packages/cli/src/commands/command-parser.ts`): Detects `/command` patterns
 2. **Command Registry** (`packages/cli/src/commands/registry.ts`): Manages command registration and execution
 3. **Commands** (`packages/cli/src/commands/*.ts`): Implement `SlashCommand` interface
 4. **Chat Integration** (`packages/cli/src/ui/components/Chat.tsx`): Intercepts before agent
 
 **Benefits**:
+
 - No token usage (free, instant)
 - Direct UI manipulation (clear messages, export files, etc.)
 - Extensible (easy to add new commands)
@@ -249,9 +268,11 @@ if (parsed.isCommand) {
 - Clear separation: UI commands vs Agent tools
 
 **Current Commands**:
+
 - `/export` - Export conversation history to markdown file
 
 **Adding New Commands**:
+
 ```typescript
 // 1. Create command file
 export const MyCommand: SlashCommand = {
@@ -261,7 +282,7 @@ export const MyCommand: SlashCommand = {
   async execute(args, context) {
     // Implementation
     return { success: true, message: 'Done!' };
-  }
+  },
 };
 
 // 2. Register in Chat.tsx
@@ -291,7 +312,9 @@ registry.register(MyCommand);
 
 ### Naming
 
-- **Files**: kebab-case (e.g., `my-tool.ts`)
+- **Files**:
+  - TypeScript files (`.ts`): kebab-case (e.g., `my-tool.ts`, `user-service.ts`)
+  - React components (`.tsx`): PascalCase (e.g., `Header.tsx`, `Chat.tsx`)
 - **Classes**: PascalCase (e.g., `ToolRegistry`)
 - **Functions**: camelCase (e.g., `executeCommand`)
 - **Constants**: UPPER_SNAKE_CASE (e.g., `DEFAULT_CONFIG`)
@@ -313,6 +336,7 @@ registry.register(MyCommand);
 5. Test manually or add to `tests/tools/`
 
 **Example**:
+
 ```typescript
 import { z } from 'zod';
 import type { Tool } from '../types/index.js';
@@ -342,14 +366,17 @@ export const MyTool: Tool = {
 
 1. Create markdown file in `skills/` (e.g., `my-skill.md`)
 2. Add metadata in HTML comments:
+
    ```markdown
    <!-- name: my-skill -->
    <!-- triggers: /myskill, my trigger phrase -->
    <!-- environment: generic -->
 
    # Skill content here
+
    Use {{WORKING_DIR}} for variables
    ```
+
 3. Skills are auto-loaded by `SkillLoader`
 
 ### Adding a New LLM Provider
@@ -366,16 +393,19 @@ export const MyTool: Tool = {
 ### Testing
 
 **Run tests**:
+
 ```bash
 bun test
 ```
 
 **Run specific test**:
+
 ```bash
 bun test tests/tools/bash.test.ts
 ```
 
 **Type checking**:
+
 ```bash
 bun run typecheck
 ```
@@ -436,11 +466,13 @@ bun run typecheck
 ### How to Debug a Tool
 
 1. Add logging in `execute()`:
+
    ```typescript
    logger.debug('Tool input:', params);
    ```
 
 2. Check tool result in agent events:
+
    ```typescript
    if (event.type === 'tool_result') {
      console.log('Tool output:', event.result);
@@ -456,6 +488,7 @@ bun run typecheck
 ### How to Add a CLI Command
 
 1. Add command in `packages/cli/src/index.tsx`:
+
    ```typescript
    program
      .command('mycommand')
@@ -470,6 +503,7 @@ bun run typecheck
 ### How to Test Cross-Platform Behavior
 
 1. Use `detectPlatform()` to check platform:
+
    ```typescript
    if (isWindows()) {
      // Windows-specific logic
@@ -531,11 +565,13 @@ bun run typecheck
 This project follows strict coding standards enforced by automated tooling.
 
 ### Documentation
+
 - [CODE_STYLE.md](./docs/CODE_STYLE.md) - Comprehensive style guide
 - [COMMIT_CONVENTION.md](./docs/COMMIT_CONVENTION.md) - Conventional commits
 - [CONTRIBUTING.md](./docs/CONTRIBUTING.md) - How to contribute
 
 ### Tooling
+
 - **Prettier** - Code formatting (100 char line length, single quotes, trailing commas)
 - **ESLint** - Linting with TypeScript strict rules
 - **Bun test** - Testing framework (built-in)
@@ -543,7 +579,8 @@ This project follows strict coding standards enforced by automated tooling.
 - **commitlint** - Commit message validation
 
 ### Key Conventions
-- Files: `kebab-case` (e.g., `user-service.ts`)
+
+- Files: `kebab-case` for `.ts` files (e.g., `user-service.ts`), `PascalCase` for `.tsx` components (e.g., `Header.tsx`)
 - Variables/Functions: `camelCase` (e.g., `executeCommand`)
 - Classes/Interfaces: `PascalCase` (e.g., `ToolRegistry`)
 - Constants: `UPPER_SNAKE_CASE` (e.g., `MAX_RETRY_ATTEMPTS`)
@@ -552,7 +589,9 @@ This project follows strict coding standards enforced by automated tooling.
 - Cross-platform support (Windows PowerShell + Unix bash)
 
 ### Pre-commit Checks
+
 Once tooling is set up (see CONTRIBUTING.md), these run automatically:
+
 - Type checking (`bun run typecheck`)
 - Linting (`bun run lint`)
 - Formatting (`bun run format:check`)
@@ -604,14 +643,17 @@ claude-x/
 ### Package Responsibilities
 
 **@claude-x/core** - No UI dependencies, can be used programmatically:
+
 - Agent, LLM clients, tools, utilities
 - Can be imported by CLI, GUI, or custom integrations
 
 **@claude-x/cli** - Terminal UI with ink/React:
+
 - Depends on `@claude-x/core`
 - ink components, CLI commands, slash commands
 
 **Rationale**:
+
 - Separation enables future GUI package
 - Core can be used as a library
 - CLI owns all terminal-specific code
