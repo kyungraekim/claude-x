@@ -11,14 +11,17 @@ import type { Agent, AgentEvent, ToolCall, ToolResult } from '@claude-x/core';
 import { CommandRegistry, ExportCommand } from '../../commands/index.js';
 import type { CommandContext } from '../../types/command.js';
 import { parseSlashCommand } from '../../commands/command-parser.js';
-import { LOGO_IMAGE } from '../assets/images/logo.image.js';
 import { AnimatedStatus } from './AnimatedStatus.js';
-import { AnsiImageView } from './AnsiImageView.js';
 import { Message } from './Message.js';
 import { ToolExecution } from './ToolExecution.js';
+import { Header } from './Header.js';
 
 export interface ChatProps {
   agent: Agent;
+  name: string;
+  version: string;
+  model: string;
+  workingDir: string;
   initialMessage?: string;
 }
 
@@ -38,13 +41,22 @@ interface ToolExec {
  *
  * Interactive chat interface with agent.
  */
-export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
+export const Chat: React.FC<ChatProps> = ({
+  agent,
+  name,
+  version,
+  model,
+  workingDir,
+  initialMessage,
+}) => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentTools, setCurrentTools] = useState<ToolExec[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
-  const [currentStatusType, setCurrentStatusType] = useState<'thinking' | 'executing' | 'iterating' | 'done' | 'error' | 'default'>('default');
+  const [currentStatusType, setCurrentStatusType] = useState<
+    'thinking' | 'executing' | 'iterating' | 'done' | 'error' | 'default'
+  >('default');
   const [commandRegistry] = useState(() => {
     const registry = new CommandRegistry();
     registry.register(ExportCommand);
@@ -71,11 +83,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
           setStatusMessage,
         };
 
-        const result = await commandRegistry.execute(
-          parsed.command,
-          parsed.args,
-          commandContext,
-        );
+        const result = await commandRegistry.execute(parsed.command, parsed.args, commandContext);
 
         if (result.success) {
           setStatusMessage(result.message);
@@ -145,10 +153,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
       case 'tool_start':
         setStatusMessage(`Executing tool: ${event.toolCall.name}`);
         setCurrentStatusType('executing');
-        setCurrentTools((prev) => [
-          ...prev,
-          { toolCall: event.toolCall, isExecuting: true },
-        ]);
+        setCurrentTools((prev) => [...prev, { toolCall: event.toolCall, isExecuting: true }]);
         break;
 
       case 'tool_result':
@@ -174,18 +179,12 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
       case 'error':
         setStatusMessage(`Error: ${event.error}`);
         setCurrentStatusType('error');
-        setMessages((prev) => [
-          ...prev,
-          { role: 'system', content: `Error: ${event.error}` },
-        ]);
+        setMessages((prev) => [...prev, { role: 'system', content: `Error: ${event.error}` }]);
         break;
 
       case 'max_iterations':
         setStatusMessage('Maximum iterations reached');
-        setMessages((prev) => [
-          ...prev,
-          { role: 'system', content: 'Maximum iterations reached' },
-        ]);
+        setMessages((prev) => [...prev, { role: 'system', content: 'Maximum iterations reached' }]);
         break;
     }
   };
@@ -198,14 +197,8 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
   }, []);
 
   return (
-    <Box flexDirection="column" padding={1}>
-      {/* Header */}
-      <Box marginBottom={1} borderStyle="round" borderColor="cyan" padding={1}>
-        <AnsiImageView image={LOGO_IMAGE} />
-        <Text bold color="cyan">
-          Claude X
-        </Text>
-      </Box>
+    <Box flexDirection="column">
+      <Header name={name} version={version} model={model} workingDir={workingDir} />
 
       {/* Messages */}
       <Box flexDirection="column" marginBottom={1}>
@@ -239,11 +232,7 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
       {!isProcessing && (
         <Box>
           <Text color="cyan">You: </Text>
-          <TextInput
-            value={input}
-            onChange={setInput}
-            onSubmit={processMessage}
-          />
+          <TextInput value={input} onChange={setInput} onSubmit={processMessage} />
         </Box>
       )}
 

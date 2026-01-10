@@ -8,6 +8,7 @@
 import { render } from 'ink';
 import { program } from 'commander';
 import chalk from 'chalk';
+import packageJson from '../package.json' with { type: 'json' };
 
 // Core imports from @claude-x/core
 import {
@@ -30,6 +31,8 @@ import { App } from './ui/App.js';
 // Constants
 import { SYSTEM_PROMPTS } from './constants.js';
 
+const APP_NAME = 'Claude X';
+
 /**
  * Main CLI program
  */
@@ -37,7 +40,7 @@ async function main() {
   program
     .name('claude-x')
     .description('TypeScript-based AI coding agent CLI tool for ML training environments')
-    .version('1.0.0');
+    .version(packageJson.version);
 
   /**
    * Init command
@@ -111,7 +114,15 @@ async function main() {
         });
 
         // Render UI
-        render(<App agent={agent} />);
+        render(
+          <App
+            agent={agent}
+            name={APP_NAME}
+            version={packageJson.version}
+            model={llm.getModel()}
+            workingDir={process.cwd()}
+          />
+        );
       } catch (error) {
         console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
         process.exit(1);
@@ -159,7 +170,16 @@ async function main() {
         });
 
         // Render UI with initial message
-        render(<App agent={agent} initialMessage={task} />);
+        render(
+          <App
+            agent={agent}
+            name={APP_NAME}
+            version={packageJson.version}
+            model={llm.getModel()}
+            workingDir={process.cwd()}
+            initialMessage={task}
+          />
+        );
       } catch (error) {
         console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
         process.exit(1);
@@ -239,7 +259,16 @@ async function main() {
         }
 
         // Render UI
-        render(<App agent={agent} initialMessage={description} />);
+        render(
+          <App
+            agent={agent}
+            name={APP_NAME}
+            version={packageJson.version}
+            model={llm.getModel()}
+            workingDir={process.cwd()}
+            initialMessage={description}
+          />
+        );
       } catch (error) {
         console.error(chalk.red('Error:'), error instanceof Error ? error.message : error);
         process.exit(1);
