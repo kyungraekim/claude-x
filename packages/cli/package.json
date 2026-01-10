@@ -11,7 +11,10 @@
     "dev": "bun run src/index.tsx",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "build": "bun build src/index.tsx --outdir dist --target bun --format esm"
+    "build": "bun build src/index.tsx --outdir dist --target bun --format esm",
+    "lint": "eslint src/",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@claude-x/core": "workspace:*",
