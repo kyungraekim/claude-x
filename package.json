@@ -4,7 +4,9 @@
   "private": true,
   "description": "TypeScript-based AI coding agent CLI tool for ML training environments",
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "bun run --cwd packages/cli dev",
     "dev:legacy": "bun run src/cli.tsx",
@@ -12,7 +14,11 @@
     "start": "bun run --cwd packages/cli dev",
     "typecheck": "bun run --filter '*' typecheck",
     "test": "bun run --filter '*' test",
-    "lint": "bun run --filter '*' typecheck"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
+    "prepare": "husky"
   },
   "keywords": [
     "ai",
@@ -49,15 +55,33 @@
     "zod-to-json-schema": "^3.24.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "@eslint/js": "^9.32.0",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
     "@types/which": "^3.0.4",
     "bun-types": "^1.1.38",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.6.2",
     "react-devtools-core": "^7.0.1",
+    "typescript-eslint": "^8.33.1",
     "typescript": "^5.7.2"
   },
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }

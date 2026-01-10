@@ -6,6 +6,8 @@ bun.lockb
 dist/
 build/
 *.js
+!commitlint.config.js
+!eslint.config.js
 *.js.map
 *.d.ts
 *.d.ts.map
@@ -34,7 +36,9 @@ Thumbs.db
 Desktop.ini
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
