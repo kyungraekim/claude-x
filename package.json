@@ -4,7 +4,9 @@
   "private": true,
   "description": "TypeScript-based AI coding agent CLI tool for ML training environments",
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "bun run --cwd packages/cli dev",
     "dev:legacy": "bun run src/cli.tsx",
@@ -12,7 +14,8 @@
     "start": "bun run --cwd packages/cli dev",
     "typecheck": "bun run --filter '*' typecheck",
     "test": "bun run --filter '*' test",
-    "lint": "bun run --filter '*' typecheck"
+    "lint": "bun run --filter '*' typecheck",
+    "prepare": "husky"
   },
   "keywords": [
     "ai",
@@ -56,10 +59,21 @@
     "@types/react": "^18.3.18",
     "@types/which": "^3.0.4",
     "bun-types": "^1.1.38",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "react-devtools-core": "^7.0.1",
     "typescript": "^5.7.2"
   },
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }
