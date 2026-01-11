@@ -1,7 +1,11 @@
 #!/usr/bin/env sh
 echo "Running pre-commit checks..."
 
-bun lint-staged || exit 1
+if git diff --cached --name-only --diff-filter=ACMRT | grep -q .; then
+  bun lint-staged || exit 1
+else
+  echo "No staged files for lint-staged."
+fi
 
 echo "Type checking..."
 bun run typecheck || exit 1
