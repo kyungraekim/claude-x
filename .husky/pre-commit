@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 echo "Running pre-commit checks..."
 
-if git diff --cached --name-only --diff-filter=ACMRT | grep -q .; then
+if git diff --cached --name-only --diff-filter=ACMRT | grep -Eq '\\.(ts|tsx|json|md)$'; then
   bun lint-staged || exit 1
 else
   echo "No staged files for lint-staged."
