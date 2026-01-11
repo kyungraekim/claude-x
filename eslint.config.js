@@ -25,7 +25,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/core/**/*.ts'],
+    files: ['packages/core/src/**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: './packages/core/tsconfig.json',
@@ -34,10 +34,28 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/cli/**/*.{ts,tsx}'],
+    files: ['packages/core/tests/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: './packages/core/tsconfig.test.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
+    files: ['packages/cli/src/**/*.{ts,tsx}'],
     languageOptions: {
       parserOptions: {
         project: './packages/cli/tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
+    files: ['packages/cli/tests/**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        project: './packages/cli/tsconfig.test.json',
         tsconfigRootDir: import.meta.dirname,
       },
     },

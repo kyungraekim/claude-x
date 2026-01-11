@@ -3,7 +3,9 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { BashTool } from '../../packages/core/src/tools/builtin/bash.js';
+import { tmpdir } from 'node:os';
+import { BashTool } from '../../src/tools/builtin/bash.js';
+import { isWindows, toUnixPath } from '../../src/utils/platform.js';
 
 describe('BashTool', () => {
   test('should have correct name', () => {
@@ -51,13 +53,15 @@ describe('BashTool', () => {
   });
 
   test('should support working directory', async () => {
+    const workingDir = tmpdir();
+    const command = isWindows() ? '(Get-Location).Path' : 'pwd';
     const result = await BashTool.execute({
-      command: 'pwd',
-      workingDir: '/tmp',
+      command,
+      workingDir,
     });
 
     expect(result.success).toBe(true);
-    expect(result.output).toContain('/tmp');
+    expect(toUnixPath(result.output)).toContain(toUnixPath(workingDir));
   });
 
   test('should validate input schema', () => {

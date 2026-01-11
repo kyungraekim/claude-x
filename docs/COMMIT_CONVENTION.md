@@ -34,21 +34,22 @@ The header is **mandatory** and must conform to this format:
 
 The type must be one of the following:
 
-| Type | Description | Version Bump |
-|------|-------------|--------------|
-| `feat` | A new feature | MINOR |
-| `fix` | A bug fix | PATCH |
-| `docs` | Documentation only changes | - |
-| `style` | Changes that don't affect code meaning (whitespace, formatting, etc.) | - |
-| `refactor` | Code change that neither fixes a bug nor adds a feature | - |
-| `perf` | Code change that improves performance | PATCH |
-| `test` | Adding missing tests or correcting existing tests | - |
-| `build` | Changes that affect the build system or external dependencies | - |
-| `ci` | Changes to CI configuration files and scripts | - |
-| `chore` | Other changes that don't modify src or test files | - |
-| `revert` | Reverts a previous commit | - |
+| Type       | Description                                                           | Version Bump |
+| ---------- | --------------------------------------------------------------------- | ------------ |
+| `feat`     | A new feature                                                         | MINOR        |
+| `fix`      | A bug fix                                                             | PATCH        |
+| `docs`     | Documentation only changes                                            | -            |
+| `style`    | Changes that don't affect code meaning (whitespace, formatting, etc.) | -            |
+| `refactor` | Code change that neither fixes a bug nor adds a feature               | -            |
+| `perf`     | Code change that improves performance                                 | PATCH        |
+| `test`     | Adding missing tests or correcting existing tests                     | -            |
+| `build`    | Changes that affect the build system or external dependencies         | -            |
+| `ci`       | Changes to CI configuration files and scripts                         | -            |
+| `chore`    | Other changes that don't modify src or test files                     | -            |
+| `revert`   | Reverts a previous commit                                             | -            |
 
 **Notes:**
+
 - `feat` and `fix` trigger version bumps in semantic versioning
 - `perf` improvements are treated as patches
 - Breaking changes can be any type with `BREAKING CHANGE:` in footer
@@ -58,6 +59,7 @@ The type must be one of the following:
 The scope is **optional** and specifies what part of the codebase is affected:
 
 **Common scopes for claude-x:**
+
 - `agent` - Agent loop and orchestration
 - `llm` - LLM client implementations (Anthropic, OpenAI, Ollama)
 - `tools` - Tool registry or specific tools
@@ -70,6 +72,7 @@ The scope is **optional** and specifies what part of the codebase is affected:
 - Specific components: `chat`, `spinner`, `message-list`
 
 **Examples:**
+
 ```
 feat(agent): add retry logic for failed tool calls
 fix(llm): resolve streaming response timeout
@@ -78,11 +81,13 @@ refactor(tools): extract common validation logic
 ```
 
 **For multiple scopes**, use comma separation:
+
 ```
 feat(agent,tools): add parallel tool execution support
 ```
 
 **If no specific scope**, omit the parentheses:
+
 ```
 docs: update contributing guidelines
 chore: bump dependencies
@@ -98,6 +103,7 @@ The subject contains a succinct description of the change:
 - **Maximum 72 characters** (ideally 50)
 
 **✅ Good examples:**
+
 ```
 fix: resolve memory leak in event listeners
 feat: add dark mode support
@@ -105,6 +111,7 @@ docs: clarify API usage examples
 ```
 
 **❌ Bad examples:**
+
 ```
 fix: Fixed the bug                    // Past tense
 feat: Added support for dark mode     // Past tense
@@ -121,11 +128,13 @@ The body is **optional** and should include:
 - Implementation details (if complex)
 
 **Rules:**
+
 - Use imperative, present tense
 - Wrap at 72 characters
 - Separate from header with a blank line
 
 **Example:**
+
 ```
 feat(agent): implement automatic retry for transient failures
 
@@ -148,6 +157,7 @@ The footer is **optional** and should contain:
 - **Pull request references** - Reference PRs if applicable
 
 **Rules:**
+
 - Separate from body with a blank line
 - Can have multiple footers
 
@@ -372,6 +382,7 @@ This project uses [commitlint](https://commitlint.js.org/) to enforce these conv
 3. **If invalid**, the commit is rejected with an explanation
 
 **Example validation error:**
+
 ```
 ⧗   input: bad: this is a bad commit message
 ✖   subject may not be empty [subject-empty]

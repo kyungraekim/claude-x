@@ -46,6 +46,7 @@ tools/
 ```
 
 **Rules:**
+
 - Use `kebab-case` for file and directory names
 - Use descriptive, meaningful names
 - Include file type suffix: `.test.ts`, `.types.ts`
@@ -68,12 +69,12 @@ const fetchUserData = async (userId: string) => {
 };
 
 // ❌ Bad
-const UserName = 'John';           // PascalCase
-const is_logged_in = true;         // snake_case
-const ITEM_COUNT = 42;             // SCREAMING_CASE (unless constant)
+const UserName = 'John'; // PascalCase
+const is_logged_in = true; // snake_case
+const ITEM_COUNT = 42; // SCREAMING_CASE (unless constant)
 
-function CalculateTotal() {}       // PascalCase
-function calculate_total() {}      // snake_case
+function CalculateTotal() {} // PascalCase
+function calculate_total() {} // snake_case
 ```
 
 ### Constants
@@ -91,8 +92,8 @@ const apiConfig = {
 } as const;
 
 // ❌ Bad - inconsistent naming
-const maxRetryAttempts = 3;        // Should be SCREAMING_CASE
-const api_base_url = '...';        // snake_case
+const maxRetryAttempts = 3; // Should be SCREAMING_CASE
+const api_base_url = '...'; // snake_case
 ```
 
 ### Classes and Interfaces
@@ -116,11 +117,11 @@ type RequestOptions = {
 };
 
 // ❌ Bad
-class userManager {}               // camelCase
-class user_manager {}              // snake_case
+class userManager {} // camelCase
+class user_manager {} // snake_case
 
-interface IUserConfig {}           // "I" prefix (old convention)
-interface iUserConfig {}           // lowercase "i" prefix
+interface IUserConfig {} // "I" prefix (old convention)
+interface iUserConfig {} // lowercase "i" prefix
 ```
 
 ### Enums
@@ -148,10 +149,10 @@ const enum Direction {
 }
 
 // ❌ Bad
-enum userRole {}                   // camelCase
-enum USER_ROLE {}                  // SCREAMING_CASE
+enum userRole {} // camelCase
+enum USER_ROLE {} // SCREAMING_CASE
 enum UserRole {
-  admin = 'ADMIN',                 // lowercase value
+  admin = 'ADMIN', // lowercase value
 }
 ```
 
@@ -175,7 +176,7 @@ interface Repository<TEntity, TId> {
 
 // ❌ Bad
 function identity<t>(arg: t): t {} // lowercase
-function merge<Type1, Type2>() {}  // unclear convention mix
+function merge<Type1, Type2>() {} // unclear convention mix
 ```
 
 ### Boolean Variables
@@ -189,9 +190,9 @@ const shouldRetry = false;
 const wasSuccessful = true;
 
 // ❌ Bad - Ambiguous names
-const loading = true;              // Verb or boolean?
-const error = false;               // Error object or boolean?
-const edit = true;                 // Action or permission?
+const loading = true; // Verb or boolean?
+const error = false; // Error object or boolean?
+const edit = true; // Action or permission?
 ```
 
 ## TypeScript Specifics
@@ -205,8 +206,8 @@ function calculateArea(width: number, height: number): number {
 }
 
 // ✅ Good - Let TypeScript infer obvious types
-const count = 42;                  // Inferred as number
-const items = [1, 2, 3];          // Inferred as number[]
+const count = 42; // Inferred as number
+const items = [1, 2, 3]; // Inferred as number[]
 
 // ✅ Good - Explicit for complex types
 const config: UserConfig = {
@@ -215,11 +216,12 @@ const config: UserConfig = {
 };
 
 // ❌ Bad - Unnecessary type annotations
-const count: number = 42;          // Obvious inference
-const name: string = 'John';       // Obvious inference
+const count: number = 42; // Obvious inference
+const name: string = 'John'; // Obvious inference
 
 // ❌ Bad - Missing necessary annotations
-function process(data) {           // Implicit any
+function process(data) {
+  // Implicit any
   return data;
 }
 ```
@@ -298,7 +300,7 @@ function findUser(id: string): User {
 }
 
 // ❌ Bad - Using || for defaults (catches empty strings, 0, etc.)
-const port = process.env.PORT || 3000;  // Use ?? instead
+const port = process.env.PORT || 3000; // Use ?? instead
 ```
 
 ### Array Types
@@ -309,11 +311,14 @@ const numbers: number[] = [1, 2, 3];
 const users: User[] = [];
 
 // ✅ Also acceptable - Generic syntax for complex types
-const matrix: Array<number[]> = [[1, 2], [3, 4]];
+const matrix: Array<number[]> = [
+  [1, 2],
+  [3, 4],
+];
 const callbacks: Array<() => void> = [];
 
 // ❌ Bad - Inconsistent usage
-const numbers: Array<number> = [1, 2, 3];  // Mix with numbers[]
+const numbers: Array<number> = [1, 2, 3]; // Mix with numbers[]
 const users: User[] = [];
 ```
 
@@ -373,7 +378,9 @@ function sanitizeCommand(cmd: string): string {
 export const BashTool: Tool = {
   name: 'bash',
   description: 'Execute bash commands',
-  inputSchema: z.object({ /* ... */ }),
+  inputSchema: z.object({
+    /* ... */
+  }),
   async execute(params) {
     // Implementation
   },
@@ -415,7 +422,13 @@ const user = await fetchUser({
 const result = await processData({ userId, options: { cache: true, retry: 3 } });
 
 // ❌ Bad - Exceeds 100 characters significantly
-const user = await fetchUser({ id: userId, includeProfile: true, includePermissions: true, includeSettings: true, includeHistory: true });
+const user = await fetchUser({
+  id: userId,
+  includeProfile: true,
+  includePermissions: true,
+  includeSettings: true,
+  includeHistory: true,
+});
 ```
 
 ### Indentation
@@ -452,11 +465,7 @@ const greeting = 'Hello, ' + name; // Use template literal
 
 ```typescript
 // ✅ Good
-const colors = [
-  'red',
-  'green',
-  'blue',
-];
+const colors = ['red', 'green', 'blue'];
 
 const config = {
   timeout: 5000,
@@ -464,11 +473,7 @@ const config = {
 };
 
 // ❌ Bad - Missing trailing comma
-const colors = [
-  'red',
-  'green',
-  'blue'
-];
+const colors = ['red', 'green', 'blue'];
 ```
 
 ### Spacing
@@ -492,16 +497,17 @@ function myFunction() {}
 const myFunc = () => {};
 
 // ❌ Bad
-const sum=a+b;                     // No spaces
-if(condition){}                    // No spaces
-function myFunction () {}          // Extra space
+const sum = a + b; // No spaces
+if (condition) {
+} // No spaces
+function myFunction() {} // Extra space
 ```
 
 ## Comments and Documentation
 
 ### JSDoc Comments
 
-```typescript
+````typescript
 /**
  * Executes a shell command with timeout and error handling.
  *
@@ -516,13 +522,10 @@ function myFunction () {}          // Extra space
  * console.log(result.output);
  * ```
  */
-async function executeCommand(
-  command: string,
-  options: ExecuteOptions
-): Promise<CommandResult> {
+async function executeCommand(command: string, options: ExecuteOptions): Promise<CommandResult> {
   // Implementation
 }
-```
+````
 
 ### Inline Comments
 
@@ -638,10 +641,7 @@ async function fetchUserData(userId: string): Promise<User> {
 
 // ✅ Good - Parallel requests when possible
 async function fetchUserData(userId: string): Promise<User> {
-  const [user, settings] = await Promise.all([
-    fetchUser(userId),
-    fetchSettings(userId),
-  ]);
+  const [user, settings] = await Promise.all([fetchUser(userId), fetchSettings(userId)]);
   return { ...user, settings };
 }
 
@@ -713,8 +713,8 @@ describe('BashTool', () => {
 });
 
 // ❌ Bad - Wrong test framework imports
-import { describe, it, expect } from 'vitest';  // Wrong!
-import { describe, it, expect } from 'jest';    // Wrong!
+import { describe, it, expect } from 'vitest'; // Wrong!
+import { describe, it, expect } from 'jest'; // Wrong!
 ```
 
 ### Test Structure
@@ -764,7 +764,7 @@ import { executeCommand } from '@/utils/shell.js';
 const result = await executeCommand('list files', { timeout: 5000 });
 
 // ❌ Bad - Hardcoded shell commands
-const result = await exec('ls -la');  // Doesn't work on Windows!
+const result = await exec('ls -la'); // Doesn't work on Windows!
 ```
 
 ### Path Handling
@@ -780,7 +780,7 @@ import path from 'node:path';
 const fullPath = path.join(baseDir, 'subdir', 'file.txt');
 
 // ❌ Bad - Hardcoded separators
-const fullPath = baseDir + '/' + 'file.txt';  // Breaks on Windows!
+const fullPath = baseDir + '/' + 'file.txt'; // Breaks on Windows!
 ```
 
 ### Line Endings
@@ -789,10 +789,10 @@ const fullPath = baseDir + '/' + 'file.txt';  // Breaks on Windows!
 // ✅ Good - Platform-aware line endings
 import { getLineEnding } from '@/utils/platform.js';
 
-const content = lines.join(getLineEnding());  // \r\n on Windows, \n on Unix
+const content = lines.join(getLineEnding()); // \r\n on Windows, \n on Unix
 
 // ❌ Bad - Hardcoded line endings
-const content = lines.join('\n');  // May break on Windows
+const content = lines.join('\n'); // May break on Windows
 ```
 
 ### Testing Cross-Platform Code

@@ -3,8 +3,8 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { MarkdownFormatter } from '../../packages/core/src/export/formatter.js';
-import type { ConversationExport } from '../../packages/core/src/export/formatter.js';
+import { MarkdownFormatter } from '../../src/export/formatter.js';
+import type { ConversationExport } from '../../src/export/formatter.js';
 
 describe('MarkdownFormatter', () => {
   test('formats conversation correctly', () => {

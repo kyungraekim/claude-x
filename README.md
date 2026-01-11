@@ -169,12 +169,14 @@ Skills are markdown files that provide environment-specific guidance to the agen
 You are helping with local ML training.
 
 ## Steps:
+
 1. Check GPU availability (nvidia-smi)
 2. Set up virtual environment
 3. Install dependencies
 4. Run training script
 
 ## Variables:
+
 - Working directory: {{WORKING_DIR}}
 - Platform: {{PLATFORM}}
 ```
@@ -190,6 +192,7 @@ You are helping with local ML training.
 Built-in tools available to the agent:
 
 ### bash
+
 Execute shell commands (cross-platform).
 
 ```typescript
@@ -200,15 +203,17 @@ Execute shell commands (cross-platform).
 ```
 
 ### read
+
 Read file contents.
 
 ```typescript
 {
-  path: "/path/to/file.txt"
+  path: '/path/to/file.txt';
 }
 ```
 
 ### write
+
 Write content to a file.
 
 ```typescript
@@ -219,6 +224,7 @@ Write content to a file.
 ```
 
 ### grep
+
 Search files for patterns.
 
 ```typescript
@@ -235,21 +241,16 @@ Search files for patterns.
 
 ```
 claude-x/
-├── src/
-│   ├── cli.tsx              # CLI entry point
-│   ├── constants.ts         # Default values
-│   ├── types/               # TypeScript interfaces
-│   ├── utils/               # Cross-platform helpers
+├── packages/
 │   ├── core/
-│   │   ├── llm/            # LLM client abstraction
-│   │   ├── tools/          # Tool registry
-│   │   ├── skills/         # Skills system
-│   │   └── agent/          # Agentic loop
-│   ├── tools/              # Built-in tools
-│   └── ui/                 # Terminal UI (ink)
+│   │   ├── src/            # Core agent logic
+│   │   └── tests/          # Core tests
+│   └── cli/
+│       ├── src/            # CLI entry and UI
+│       └── tests/          # CLI tests
 ├── skills/                 # Default skills
 ├── examples/               # Usage examples
-└── tests/                  # Test files
+└── docs/                   # Documentation
 ```
 
 ### Adding a Custom Tool
@@ -289,11 +290,13 @@ bun run typecheck
 ## Cross-Platform Notes
 
 ### Windows
+
 - Uses PowerShell for shell commands
 - Paths use backslashes but are normalized internally
 - Some commands may differ (e.g., `dir` vs `ls`)
 
 ### macOS/Linux
+
 - Uses bash or zsh for shell commands
 - Standard Unix paths and commands
 
@@ -304,12 +307,14 @@ The agent automatically detects the platform and adjusts tool behavior according
 The following features are marked as TODOs in the codebase:
 
 ### High Priority
+
 - [ ] Rate limiting and retry logic for LLM API calls
 - [ ] Conversation history pruning and token management
 - [ ] Tool sandboxing and security restrictions
 - [ ] Streaming LLM responses in terminal UI
 
 ### Medium Priority
+
 - [ ] Parallel tool execution
 - [ ] Advanced error recovery
 - [ ] Skill hot-reloading
@@ -318,6 +323,7 @@ The following features are marked as TODOs in the codebase:
 - [ ] Interactive config management UI
 
 ### Slash Commands (Extensibility)
+
 - [ ] Add `/help` command to show available slash commands
 - [ ] Add `/reset` or `/clear` command to clear conversation history
 - [ ] Support additional export formats (JSON, plain text, HTML)
@@ -342,6 +348,7 @@ MIT
 ## Support
 
 For issues and questions:
+
 - File an issue on GitHub
 - Check existing issues for solutions
 

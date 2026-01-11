@@ -67,14 +67,14 @@ claude-x/
 
 ### Where to Add Features
 
-| Feature Type | Location |
-|--------------|----------|
-| New LLM provider (e.g., Claude, GPT, Ollama) | `packages/core/src/llm/` |
-| New tool (e.g., bash, file operations) | `packages/core/src/tools/builtin/` |
-| New skill (training guides, etc.) | `skills/` |
-| UI component | `packages/cli/src/ui/components/` |
-| Slash command | `packages/cli/src/commands/` |
-| Utility function | `packages/core/src/utils/` |
+| Feature Type                                 | Location                           |
+| -------------------------------------------- | ---------------------------------- |
+| New LLM provider (e.g., Claude, GPT, Ollama) | `packages/core/src/llm/`           |
+| New tool (e.g., bash, file operations)       | `packages/core/src/tools/builtin/` |
+| New skill (training guides, etc.)            | `skills/`                          |
+| UI component                                 | `packages/cli/src/ui/components/`  |
+| Slash command                                | `packages/cli/src/commands/`       |
+| Utility function                             | `packages/core/src/utils/`         |
 
 ### Package Dependencies
 
@@ -174,8 +174,8 @@ This project uses **Bun test** (not Vitest, not Jest).
 
 #### Test Structure
 
-- Place test files next to the code: `bash-tool.ts` → `bash-tool.test.ts`
-- Or place in `tests/` directory mirroring source structure
+- Place test files next to the code within the package: `bash-tool.ts` → `bash-tool.test.ts`
+- Or place in `packages/<package>/tests/` mirroring source structure
 - Use descriptive test names starting with "should"
 - Follow the Arrange-Act-Assert pattern
 
@@ -250,7 +250,7 @@ import { normalizePathForPlatform } from '@/utils/platform.js';
 const userPath = normalizePathForPlatform('~/workspace');
 
 // ❌ Bad - Hardcoded Unix paths
-const userPath = '/home/user/workspace';  // Breaks on Windows!
+const userPath = '/home/user/workspace'; // Breaks on Windows!
 ```
 
 ### Adding Dependencies
@@ -319,18 +319,22 @@ When opening a PR, include:
 
 ```markdown
 ## Description
+
 Brief description of what this PR does
 
 ## Related Issues
+
 Closes #123
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] Documentation update
 
 ## Testing
+
 - [ ] Tested on macOS
 - [ ] Tested on Linux
 - [ ] Tested on Windows PowerShell
@@ -338,6 +342,7 @@ Closes #123
 Describe the tests you added or how you tested this change
 
 ## Checklist
+
 - [ ] My code follows the style guidelines ([CODE_STYLE.md](./CODE_STYLE.md))
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
@@ -384,6 +389,7 @@ When making significant changes:
 ## Recognition
 
 Contributors are recognized in:
+
 - The project's README
 - Release notes for significant contributions
 - Git commit history
