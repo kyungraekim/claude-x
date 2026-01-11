@@ -4,17 +4,24 @@
  * Implements the LLMClient interface for Ollama's local models.
  */
 
+import type {
+  ChatRequest,
+  ChatResponse,
+  Message,
+  Tool as OllamaTool,
+  ToolCall as OllamaToolCall,
+} from 'ollama';
 import { Ollama } from 'ollama';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { LLMClient } from './base.js';
 import type {
   LLMMessage,
   LLMResponse,
+  ProviderTool,
   StreamChunk,
   Tool,
-  ProviderTool,
   ToolCall,
 } from '../types/index.js';
+import { LLMClient } from './base.js';
 
 /**
  * Ollama client implementation
@@ -41,10 +48,8 @@ export class OllamaClient extends LLMClient {
   async sendMessage(messages: LLMMessage[], tools?: Tool[]): Promise<LLMResponse> {
     try {
       // Convert messages to Ollama format
-      const ollamaMessages = messages.map((msg) => {
-        const content = typeof msg.content === 'string'
-          ? msg.content
-          : JSON.stringify(msg.content);
+      const ollamaMessages: Message[] = messages.map((msg) => {
+        const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
 
         return {
           role: msg.role as 'system' | 'user' | 'assistant',
@@ -53,7 +58,7 @@ export class OllamaClient extends LLMClient {
       });
 
       // Prepare request parameters
-      const params: any = {
+      const params: ChatRequest & { stream: false } = {
         model: this.model,
         messages: ollamaMessages,
         stream: false,
@@ -65,23 +70,27 @@ export class OllamaClient extends LLMClient {
 
       // Add tools if provided
       if (tools && tools.length > 0) {
-        params.tools = this.convertToolsToProviderFormat(tools);
+        params.tools = this.convertToolsToProviderFormat(tools).map((tool) =>
+          this.toOllamaTool(tool)
+        );
       }
 
       // Call Ollama API
-      const response: any = await this.client.chat(params);
+      const response: ChatResponse = await this.client.chat(params);
 
       // Extract content and tool calls
-      let content = response.message?.content || '';
+      const content = response.message?.content || '';
       const toolCalls: ToolCall[] = [];
 
       // Check if there are tool calls in the response
       if (response.message?.tool_calls && response.message.tool_calls.length > 0) {
         for (const toolCall of response.message.tool_calls) {
+          const input = this.getToolInput(toolCall);
+
           toolCalls.push({
             id: toolCall.function?.name || `tool_${Date.now()}`,
             name: toolCall.function?.name || '',
-            input: toolCall.function?.arguments || {},
+            input,
           });
         }
       }
@@ -90,10 +99,12 @@ export class OllamaClient extends LLMClient {
         content,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
         stopReason: this.mapDoneReason(response.done_reason),
-        usage: response.eval_count ? {
-          inputTokens: response.prompt_eval_count || 0,
-          outputTokens: response.eval_count || 0,
-        } : undefined,
+        usage: response.eval_count
+          ? {
+              inputTokens: response.prompt_eval_count || 0,
+              outputTokens: response.eval_count || 0,
+            }
+          : undefined,
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -154,7 +165,7 @@ export class OllamaClient extends LLMClient {
       });
 
       // Remove the $schema property
-      const { $schema, ...parameters } = jsonSchema;
+      const { $schema: _schema, ...parameters } = jsonSchema;
 
       // Ollama uses OpenAI-compatible function calling format
       return {
@@ -201,5 +212,24 @@ export class OllamaClient extends LLMClient {
   setBaseUrl(baseUrl: string): void {
     this.baseUrl = baseUrl;
     this.client = new Ollama({ host: baseUrl });
+  }
+
+  private toOllamaTool(tool: ProviderTool): OllamaTool {
+    return {
+      type: tool.type ?? 'function',
+      function: tool.function ?? {
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters ?? {},
+      },
+    };
+  }
+
+  private getToolInput(toolCall: OllamaToolCall): Record<string, unknown> {
+    const rawInput = toolCall.function?.arguments as unknown;
+    if (typeof rawInput === 'object' && rawInput !== null) {
+      return rawInput as Record<string, unknown>;
+    }
+    return {};
   }
 }

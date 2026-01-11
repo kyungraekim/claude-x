@@ -35,9 +35,7 @@ export class OpenAIClient extends LLMClient {
       // Convert messages to OpenAI format
       const openaiMessages = messages.map((msg) => {
         // OpenAI expects simple string content for most messages
-        const content = typeof msg.content === 'string'
-          ? msg.content
-          : JSON.stringify(msg.content);
+        const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
 
         return {
           role: msg.role as 'system' | 'user' | 'assistant',
@@ -79,10 +77,12 @@ export class OpenAIClient extends LLMClient {
       if (choice.message.tool_calls) {
         for (const toolCall of choice.message.tool_calls) {
           if (toolCall.type === 'function') {
+            const input = this.parseToolInput(toolCall.function.arguments);
+
             toolCalls.push({
               id: toolCall.id,
               name: toolCall.function.name,
-              input: JSON.parse(toolCall.function.arguments),
+              input,
             });
           }
         }
@@ -92,10 +92,12 @@ export class OpenAIClient extends LLMClient {
         content,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
         stopReason: this.mapFinishReason(choice.finish_reason),
-        usage: response.usage ? {
-          inputTokens: response.usage.prompt_tokens,
-          outputTokens: response.usage.completion_tokens,
-        } : undefined,
+        usage: response.usage
+          ? {
+              inputTokens: response.usage.prompt_tokens,
+              outputTokens: response.usage.completion_tokens,
+            }
+          : undefined,
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -156,7 +158,7 @@ export class OpenAIClient extends LLMClient {
       });
 
       // Remove the $schema property
-      const { $schema, ...parameters } = jsonSchema;
+      const { $schema: _schema, ...parameters } = jsonSchema;
 
       return {
         name: tool.name,
@@ -185,5 +187,13 @@ export class OpenAIClient extends LLMClient {
       default:
         return 'error';
     }
+  }
+
+  private parseToolInput(raw: string): Record<string, unknown> {
+    const parsed = JSON.parse(raw) as unknown;
+    if (typeof parsed === 'object' && parsed !== null) {
+      return parsed as Record<string, unknown>;
+    }
+    return {};
   }
 }

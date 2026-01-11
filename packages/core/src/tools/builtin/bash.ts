@@ -30,6 +30,8 @@ const BashInputSchema = z.object({
   timeout: z.number().optional().describe('Timeout in milliseconds'),
 });
 
+type BashInput = z.infer<typeof BashInputSchema>;
+
 /**
  * Bash tool implementation
  *
@@ -43,9 +45,10 @@ const BashInputSchema = z.object({
  * - Path restrictions
  * - Resource limits
  */
-export const BashTool: Tool = {
+export const BashTool: Tool<BashInput> = {
   name: 'bash',
-  description: 'Execute a shell command. On Windows uses PowerShell, on Unix uses bash. Returns stdout, stderr, and exit code.',
+  description:
+    'Execute a shell command. On Windows uses PowerShell, on Unix uses bash. Returns stdout, stderr, and exit code.',
 
   inputSchema: BashInputSchema,
 

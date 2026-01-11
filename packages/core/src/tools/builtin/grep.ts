@@ -40,6 +40,8 @@ const GrepInputSchema = z.object({
   maxResults: z.number().optional().default(100).describe('Maximum number of results to return'),
 });
 
+type GrepInput = z.infer<typeof GrepInputSchema>;
+
 /**
  * Grep tool implementation
  *
@@ -53,9 +55,10 @@ const GrepInputSchema = z.object({
  * - Parallel file processing
  * - Result caching
  */
-export const GrepTool: Tool = {
+export const GrepTool: Tool<GrepInput> = {
   name: 'grep',
-  description: 'Search for patterns in files. Supports regex patterns and glob file filtering. Returns matching lines with file paths and line numbers.',
+  description:
+    'Search for patterns in files. Supports regex patterns and glob file filtering. Returns matching lines with file paths and line numbers.',
 
   inputSchema: GrepInputSchema,
 
@@ -67,9 +70,7 @@ export const GrepTool: Tool = {
     try {
       // Build glob pattern
       const searchPattern = globPattern || '**/*';
-      const fullPattern = path.endsWith('/') || path === '.'
-        ? `${path}/${searchPattern}`
-        : path;
+      const fullPattern = path.endsWith('/') || path === '.' ? `${path}/${searchPattern}` : path;
 
       // Find matching files
       const files = await glob(fullPattern, {
@@ -113,7 +114,8 @@ export const GrepTool: Tool = {
           }
         } catch (error) {
           // Skip files that can't be read (binary, permission issues, etc.)
-          logger.debug(`Skipping file ${file}: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.debug(`Skipping file ${file}: ${errorMessage}`);
           continue;
         }
       }
@@ -130,9 +132,7 @@ export const GrepTool: Tool = {
 
       return {
         success: true,
-        output: truncated
-          ? `${output}\n\n(Results truncated at ${maxResults} matches)`
-          : output,
+        output: truncated ? `${output}\n\n(Results truncated at ${maxResults} matches)` : output,
         metadata: {
           matchCount: matches.length,
           filesSearched: files.length,

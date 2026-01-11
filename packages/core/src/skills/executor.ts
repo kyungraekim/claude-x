@@ -26,7 +26,7 @@ export class SkillExecutor {
    * @param context - Execution context
    * @returns Processed skill content
    */
-  async execute(skill: Skill, context: SkillContext): Promise<string> {
+  execute(skill: Skill, context: SkillContext): string {
     logger.debug(`Executing skill: ${skill.name}`, context);
 
     let content = skill.content;

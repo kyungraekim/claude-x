@@ -110,15 +110,19 @@ export async function executeCommand(
 
     // Collect stdout
     if (child.stdout) {
-      child.stdout.on('data', (data) => {
-        stdout += data.toString();
+      child.stdout.on('data', (data: unknown) => {
+        const chunk =
+          typeof data === 'string' ? data : data instanceof Buffer ? data.toString() : String(data);
+        stdout += chunk;
       });
     }
 
     // Collect stderr
     if (child.stderr) {
-      child.stderr.on('data', (data) => {
-        stderr += data.toString();
+      child.stderr.on('data', (data: unknown) => {
+        const chunk =
+          typeof data === 'string' ? data : data instanceof Buffer ? data.toString() : String(data);
+        stderr += chunk;
       });
     }
 

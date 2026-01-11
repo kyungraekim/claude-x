@@ -3,7 +3,7 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { parseSlashCommand } from '../../src/utils/command-parser.js';
+import { parseSlashCommand } from '../../packages/core/src/utils/command-parser.js';
 
 describe('parseSlashCommand', () => {
   test('detects slash command', () => {

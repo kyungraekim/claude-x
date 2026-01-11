@@ -134,7 +134,7 @@ export class Logger {
    * @param message - Message to log
    * @param error - Optional error object
    */
-  error(message: string, error?: Error | unknown): void {
+  error(message: string, error?: unknown): void {
     if (this.shouldLog('error')) {
       console.error(this.format('error', message));
 

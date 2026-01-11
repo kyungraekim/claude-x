@@ -17,13 +17,17 @@ export interface ToolResult {
   metadata?: Record<string, unknown>;
 }
 
+type ToolExecute<TParams> = {
+  bivarianceHack(params: TParams): Promise<ToolResult>;
+}['bivarianceHack'];
+
 /**
  * Tool definition
  *
  * All tools must implement this interface. The inputSchema uses Zod for
  * runtime validation and automatic JSON schema generation.
  */
-export interface Tool {
+export interface Tool<TParams = unknown> {
   /**
    * Unique tool name (e.g., 'bash', 'read', 'write')
    */
@@ -39,7 +43,7 @@ export interface Tool {
    * Zod schema for validating tool inputs
    * Will be converted to JSON Schema for LLM tool calling
    */
-  inputSchema: z.ZodObject<any>;
+  inputSchema: z.ZodType<TParams, z.ZodTypeDef, unknown>;
 
   /**
    * Execute the tool with validated parameters
@@ -47,7 +51,7 @@ export interface Tool {
    * @param params - Validated input parameters
    * @returns Tool result (should never throw, always return result)
    */
-  execute: (params: any) => Promise<ToolResult>;
+  execute: ToolExecute<TParams>;
 }
 
 /**

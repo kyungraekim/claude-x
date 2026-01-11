@@ -5,24 +5,26 @@
  * Main command-line interface for claude-x.
  */
 
-import { render } from 'ink';
-import { program } from 'commander';
 import chalk from 'chalk';
+import { program } from 'commander';
+import { render } from 'ink';
 import packageJson from '../package.json' with { type: 'json' };
 
 // Core imports from @claude-x/core
 import {
   Agent,
-  ToolRegistry,
   createLLMClient,
-  SkillLoader,
+  detectPlatform,
+  Environment,
+  getDefaultTools,
+  initializeConfig,
+  LLMProvider,
+  loadConfig,
+  logger,
   SkillDetector,
   SkillExecutor,
-  getDefaultTools,
-  loadConfig,
-  initializeConfig,
-  logger,
-  detectPlatform,
+  SkillLoader,
+  ToolRegistry,
 } from '@claude-x/core';
 
 // UI
@@ -32,6 +34,13 @@ import { App } from './ui/App.js';
 import { SYSTEM_PROMPTS } from './constants.js';
 
 const APP_NAME = 'Claude X';
+
+type CliOptions = {
+  model?: string;
+  provider?: LLMProvider;
+  verbose?: boolean;
+  environment?: Environment;
+};
 
 /**
  * Main CLI program
@@ -77,7 +86,7 @@ async function main() {
     .option('-m, --model <model>', 'LLM model to use')
     .option('-p, --provider <provider>', 'LLM provider (anthropic|openai)')
     .option('--verbose', 'Enable verbose logging')
-    .action(async (options) => {
+    .action(async (options: CliOptions) => {
       try {
         // Load configuration
         const config = await loadConfig();
@@ -138,7 +147,7 @@ async function main() {
     .option('-m, --model <model>', 'LLM model to use')
     .option('-p, --provider <provider>', 'LLM provider (anthropic|openai)')
     .option('--verbose', 'Enable verbose logging')
-    .action(async (task, options) => {
+    .action(async (task: string, options: CliOptions) => {
       try {
         // Load configuration
         const config = await loadConfig();
@@ -196,7 +205,7 @@ async function main() {
     .option('-p, --provider <provider>', 'LLM provider (anthropic|openai)')
     .option('-e, --environment <env>', 'Force environment (local|slurm|kubernetes)')
     .option('--verbose', 'Enable verbose logging')
-    .action(async (description, options) => {
+    .action(async (description: string, options: CliOptions) => {
       try {
         // Load configuration
         const config = await loadConfig();
@@ -232,7 +241,9 @@ async function main() {
           logger.info(`Using forced environment: ${options.environment}`);
         } else {
           environment = await skillDetector.detectEnvironment();
-          logger.info(`Detected environment: ${environment.environment} (confidence: ${environment.confidence})`);
+          logger.info(
+            `Detected environment: ${environment.environment} (confidence: ${environment.confidence})`
+          );
         }
 
         // Find appropriate skill
@@ -249,7 +260,7 @@ async function main() {
         // Add skill to prompt if found
         if (selectedSkill) {
           const skillExecutor = new SkillExecutor();
-          const processedSkill = await skillExecutor.execute(selectedSkill, {
+          const processedSkill = skillExecutor.execute(selectedSkill, {
             environment: environment.environment,
             platform: detectPlatform(),
             workingDir: process.cwd(),
@@ -278,7 +289,7 @@ async function main() {
   /**
    * Parse arguments
    */
-  program.parse();
+  await program.parseAsync();
 }
 
 // Run main function

@@ -24,6 +24,8 @@ const ReadInputSchema = z.object({
   encoding: z.enum(['utf-8', 'ascii', 'base64', 'latin1']).optional().describe('File encoding'),
 });
 
+type ReadInput = z.infer<typeof ReadInputSchema>;
+
 /**
  * Read file tool implementation
  *
@@ -32,7 +34,7 @@ const ReadInputSchema = z.object({
  * - File size limits
  * - Binary file detection
  */
-export const ReadTool: Tool = {
+export const ReadTool: Tool<ReadInput> = {
   name: 'read',
   description: 'Read the contents of a file. Returns the file contents as a string.',
 

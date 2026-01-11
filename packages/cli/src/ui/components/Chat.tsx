@@ -4,17 +4,17 @@
  * Main interactive chat interface.
  */
 
+import type { Agent, AgentEvent, ToolCall, ToolResult } from '@claude-x/core';
 import { Box, Text } from 'ink';
 import TextInput from 'ink-text-input';
 import React, { useEffect, useState } from 'react';
-import type { Agent, AgentEvent, ToolCall, ToolResult } from '@claude-x/core';
+import { parseSlashCommand } from '../../commands/command-parser.js';
 import { CommandRegistry, ExportCommand } from '../../commands/index.js';
 import type { CommandContext } from '../../types/command.js';
-import { parseSlashCommand } from '../../commands/command-parser.js';
 import { AnimatedStatus } from './AnimatedStatus.js';
+import { Header } from './Header.js';
 import { Message } from './Message.js';
 import { ToolExecution } from './ToolExecution.js';
-import { Header } from './Header.js';
 
 export interface ChatProps {
   agent: Agent;
@@ -123,7 +123,7 @@ export const Chat: React.FC<ChatProps> = ({
     try {
       // Run agent
       for await (const event of agent.run(userMessage)) {
-        await handleEvent(event);
+        handleEvent(event);
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
@@ -137,7 +137,7 @@ export const Chat: React.FC<ChatProps> = ({
   };
 
   // Handle agent events
-  const handleEvent = async (event: AgentEvent) => {
+  const handleEvent = (event: AgentEvent) => {
     switch (event.type) {
       case 'llm_start':
         setStatusMessage('Thinking');
@@ -189,12 +189,14 @@ export const Chat: React.FC<ChatProps> = ({
     }
   };
 
+  const handleSubmit = (value: string) => void processMessage(value);
+
   // Handle initial message
   useEffect(() => {
     if (initialMessage) {
-      processMessage(initialMessage);
+      void processMessage(initialMessage);
     }
-  }, []);
+  }, [initialMessage]);
 
   return (
     <Box flexDirection="column">
@@ -232,7 +234,7 @@ export const Chat: React.FC<ChatProps> = ({
       {!isProcessing && (
         <Box>
           <Text color="cyan">You: </Text>
-          <TextInput value={input} onChange={setInput} onSubmit={processMessage} />
+          <TextInput value={input} onChange={setInput} onSubmit={handleSubmit} />
         </Box>
       )}
 

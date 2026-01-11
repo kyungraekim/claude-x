@@ -3,7 +3,7 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { BashTool } from '../../src/tools/bash';
+import { BashTool } from '../../packages/core/src/tools/builtin/bash.js';
 
 describe('BashTool', () => {
   test('should have correct name', () => {

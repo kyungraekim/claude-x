@@ -10,9 +10,9 @@
 
 import { config as loadDotenv } from 'dotenv';
 import { join } from 'node:path';
-import type { Config, PartialConfig, LLMProvider } from '../types/index.js';
-import { DEFAULT_CONFIG, CONFIG_DIR } from '../constants.js';
-import { fileExists, readJSON, writeJSON, ensureDir } from './fs.js';
+import { CONFIG_DIR, DEFAULT_CONFIG } from '../constants.js';
+import type { Config, LLMProvider, PartialConfig } from '../types/index.js';
+import { ensureDir, fileExists, readJSON, writeJSON } from './fs.js';
 import { getEnv } from './platform.js';
 
 /**
@@ -38,7 +38,7 @@ export async function loadConfig(): Promise<Config> {
     try {
       const fileConfig = await readJSON<PartialConfig>(CONFIG_FILE);
       Object.assign(config, fileConfig);
-    } catch (error) {
+    } catch {
       console.warn(`Warning: Failed to load config file: ${CONFIG_FILE}`);
     }
   }
@@ -121,7 +121,7 @@ export async function loadConfig(): Promise<Config> {
     const keyName = config.llmProvider === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY';
     throw new Error(
       `No API key found for provider "${config.llmProvider}". ` +
-      `Please set ${keyName} environment variable or add it to ${CONFIG_FILE}`
+        `Please set ${keyName} environment variable or add it to ${CONFIG_FILE}`
     );
   }
 

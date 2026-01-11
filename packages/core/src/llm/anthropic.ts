@@ -6,15 +6,15 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { LLMClient } from './base.js';
 import type {
   LLMMessage,
   LLMResponse,
+  ProviderTool,
   StreamChunk,
   Tool,
-  ProviderTool,
   ToolCall,
 } from '../types/index.js';
+import { LLMClient } from './base.js';
 
 /**
  * Anthropic client implementation
@@ -37,9 +37,9 @@ export class AnthropicClient extends LLMClient {
       const conversationMessages = messages.filter((m) => m.role !== 'system');
 
       // Combine system messages into one
-      const systemPrompt = systemMessages.map((m) =>
-        typeof m.content === 'string' ? m.content : ''
-      ).join('\n\n');
+      const systemPrompt = systemMessages
+        .map((m) => (typeof m.content === 'string' ? m.content : ''))
+        .join('\n\n');
 
       // Convert messages to Anthropic format
       const anthropicMessages = conversationMessages.map((msg) => ({
@@ -150,7 +150,7 @@ export class AnthropicClient extends LLMClient {
       });
 
       // Remove the $schema property that Anthropic doesn't need
-      const { $schema, ...inputSchema } = jsonSchema;
+      const { $schema: _schema, ...inputSchema } = jsonSchema;
 
       return {
         name: tool.name,

@@ -29,6 +29,8 @@ const WriteInputSchema = z.object({
   encoding: z.enum(['utf-8', 'ascii', 'base64', 'latin1']).optional().describe('File encoding'),
 });
 
+type WriteInput = z.infer<typeof WriteInputSchema>;
+
 /**
  * Write file tool implementation
  *
@@ -42,9 +44,10 @@ const WriteInputSchema = z.object({
  * - File size limits
  * - Backup before overwriting
  */
-export const WriteTool: Tool = {
+export const WriteTool: Tool<WriteInput> = {
   name: 'write',
-  description: 'Write content to a file. Creates parent directories if they don\'t exist. Overwrites existing files.',
+  description:
+    "Write content to a file. Creates parent directories if they don't exist. Overwrites existing files.",
 
   inputSchema: WriteInputSchema,
 

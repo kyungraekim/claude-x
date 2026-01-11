@@ -15,7 +15,7 @@ import {
   getPathSeparator,
   isAbsolutePath,
   joinPaths,
-} from '../../src/utils/platform';
+} from '../../packages/core/src/utils/platform.js';
 
 describe('Platform Detection', () => {
   test('detectPlatform should return valid platform', () => {

@@ -4,11 +4,11 @@
  * Creates the appropriate LLM client based on configuration.
  */
 
-import { LLMClient } from './base.js';
-import { AnthropicClient } from './anthropic.js';
-import { OpenAIClient } from './openai.js';
-import { OllamaClient } from './ollama.js';
 import type { Config } from '../types/index.js';
+import { AnthropicClient } from './anthropic.js';
+import { LLMClient } from './base.js';
+import { OllamaClient } from './ollama.js';
+import { OpenAIClient } from './openai.js';
 
 /**
  * Create an LLM client based on configuration
@@ -20,20 +20,10 @@ import type { Config } from '../types/index.js';
 export function createLLMClient(config: Config): LLMClient {
   switch (config.llmProvider) {
     case 'anthropic':
-      return new AnthropicClient(
-        config.apiKey,
-        config.model,
-        config.maxTokens,
-        config.temperature
-      );
+      return new AnthropicClient(config.apiKey, config.model, config.maxTokens, config.temperature);
 
     case 'openai':
-      return new OpenAIClient(
-        config.apiKey,
-        config.model,
-        config.maxTokens,
-        config.temperature
-      );
+      return new OpenAIClient(config.apiKey, config.model, config.maxTokens, config.temperature);
 
     case 'ollama':
       return new OllamaClient(
@@ -45,11 +35,14 @@ export function createLLMClient(config: Config): LLMClient {
       );
 
     default:
-      throw new Error(
-        `Unknown LLM provider: ${config.llmProvider}. ` +
-        `Supported providers: anthropic, openai, ollama`
-      );
+      return assertNever(config.llmProvider);
   }
+}
+
+function assertNever(value: never): never {
+  throw new Error(
+    `Unknown LLM provider: ${String(value)}. ` + 'Supported providers: anthropic, openai, ollama'
+  );
 }
 
 /**
