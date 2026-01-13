@@ -110,41 +110,136 @@ export class OpenAIClient extends LLMClient {
   /**
    * Stream message response from GPT
    *
-   * TODO: Implement streaming for real-time updates in the terminal UI
-   * This requires handling OpenAI's streaming API and yielding chunks progressively.
-   *
-   * Example flow:
-   * 1. Call client.chat.completions.create({ stream: true })
-   * 2. Listen for delta events
-   * 3. Accumulate deltas and yield StreamChunk objects
+   * Uses OpenAI's streaming API to yield chunks progressively.
    */
   async *streamMessage(
     messages: LLMMessage[],
     tools?: Tool[]
   ): AsyncGenerator<StreamChunk, void, unknown> {
-    // TODO: Implement streaming
-    // For now, fall back to non-streaming and yield the final result
-    const response = await this.sendMessage(messages, tools);
+    try {
+      // Convert messages to OpenAI format
+      const openaiMessages = messages.map((msg) => {
+        const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+        return {
+          role: msg.role as 'system' | 'user' | 'assistant',
+          content,
+        };
+      });
 
-    if (response.content) {
-      yield {
-        type: 'text',
-        content: response.content,
+      // Prepare request parameters
+      const params: OpenAI.Chat.ChatCompletionCreateParams = {
+        model: this.model,
+        messages: openaiMessages,
+        max_tokens: this.maxTokens,
+        temperature: this.temperature,
+        stream: true, // Enable streaming
       };
-    }
 
-    if (response.toolCalls) {
-      for (const toolCall of response.toolCalls) {
+      if (tools && tools.length > 0) {
+        params.tools = this.convertToolsToProviderFormat(tools).map((tool) => ({
+          type: 'function' as const,
+          function: {
+            name: tool.name,
+            description: tool.description,
+            parameters: tool.parameters,
+          },
+        }));
+      }
+
+      // Start streaming
+      const stream = await this.client.chat.completions.create(params);
+
+      // Accumulate tool calls (OpenAI streams them as deltas)
+      const toolCallsMap = new Map<
+        number,
+        { id: string; name: string; arguments: string }
+      >();
+
+      // Process stream chunks
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta;
+
+        if (!delta) {
+          // Check for usage in the chunk (comes in last chunk)
+          if (chunk.usage) {
+            this.lastUsage = {
+              inputTokens: chunk.usage.prompt_tokens || 0,
+              outputTokens: chunk.usage.completion_tokens || 0,
+            };
+          }
+          continue;
+        }
+
+        // Handle text content
+        if (delta.content) {
+          yield {
+            type: 'text',
+            content: delta.content,
+          };
+        }
+
+        // Handle tool call deltas
+        if (delta.tool_calls) {
+          for (const toolCallDelta of delta.tool_calls) {
+            const index = toolCallDelta.index;
+            const existing = toolCallsMap.get(index);
+
+            if (!existing) {
+              // First chunk for this tool call
+              toolCallsMap.set(index, {
+                id: toolCallDelta.id || '',
+                name: toolCallDelta.function?.name || '',
+                arguments: toolCallDelta.function?.arguments || '',
+              });
+            } else {
+              // Accumulate arguments
+              if (toolCallDelta.function?.arguments) {
+                existing.arguments += toolCallDelta.function.arguments;
+              }
+            }
+          }
+        }
+
+        // Check for usage in the chunk (comes in last chunk)
+        if (chunk.usage) {
+          this.lastUsage = {
+            inputTokens: chunk.usage.prompt_tokens || 0,
+            outputTokens: chunk.usage.completion_tokens || 0,
+          };
+        }
+      }
+
+      // After stream completes, yield accumulated tool calls
+      for (const toolCall of toolCallsMap.values()) {
+        if (toolCall.id && toolCall.name) {
+          yield {
+            type: 'tool_use',
+            toolCall: {
+              id: toolCall.id,
+              name: toolCall.name,
+              input: this.parseToolInput(toolCall.arguments),
+            },
+          };
+        }
+      }
+
+      // Stream completed successfully
+      yield {
+        type: 'done',
+      };
+    } catch (error) {
+      if (error instanceof Error) {
         yield {
-          type: 'tool_use',
-          toolCall,
+          type: 'error',
+          error: `OpenAI streaming error: ${error.message}`,
+        };
+      } else {
+        yield {
+          type: 'error',
+          error: 'Unknown streaming error',
         };
       }
     }
-
-    yield {
-      type: 'done',
-    };
   }
 
   /**

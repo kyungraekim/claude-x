@@ -23,6 +23,7 @@ export abstract class LLMClient {
   protected model: string;
   protected maxTokens: number;
   protected temperature: number;
+  protected lastUsage: { inputTokens: number; outputTokens: number } | null = null;
 
   constructor(apiKey: string, model: string, maxTokens = 4096, temperature = 0.7) {
     this.apiKey = apiKey;
@@ -46,8 +47,6 @@ export abstract class LLMClient {
    * @param messages - Conversation history
    * @param tools - Available tools for the LLM to call
    * @returns Async generator of response chunks
-   *
-   * TODO: Implement streaming for real-time response display
    */
   abstract streamMessage(
     messages: LLMMessage[],
@@ -106,5 +105,19 @@ export abstract class LLMClient {
    */
   setTemperature(temperature: number): void {
     this.temperature = temperature;
+  }
+
+  /**
+   * Get last usage statistics from streaming
+   */
+  getLastUsage(): { inputTokens: number; outputTokens: number } | null {
+    return this.lastUsage;
+  }
+
+  /**
+   * Reset last usage statistics
+   */
+  resetLastUsage(): void {
+    this.lastUsage = null;
   }
 }

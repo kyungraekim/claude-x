@@ -414,10 +414,11 @@ bun run typecheck
 
 ### High Priority
 
-1. **Streaming LLM Responses** (`packages/core/src/llm/anthropic.ts`, `openai.ts`)
-   - Currently falls back to non-streaming
-   - Need to properly implement AsyncGenerator streaming
-   - Update UI to handle streaming chunks
+1. ✅ **Streaming LLM Responses** (COMPLETED)
+   - Implemented streaming for Anthropic, OpenAI, and Ollama clients
+   - Agent loop uses streaming by default
+   - UI handles streaming chunks with progressive display
+   - Token usage tracked from streaming responses
 
 2. **Conversation History Pruning** (`packages/core/src/agent/agent.ts`)
    - Agent state grows unbounded

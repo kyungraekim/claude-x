@@ -52,6 +52,7 @@ export const Chat: React.FC<ChatProps> = ({
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [currentTools, setCurrentTools] = useState<ToolExec[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
   const [currentStatusType, setCurrentStatusType] = useState<
@@ -130,6 +131,7 @@ export const Chat: React.FC<ChatProps> = ({
       setStatusMessage(`Error: ${errorMsg}`);
     } finally {
       setIsProcessing(false);
+      setIsStreaming(false);
       setCurrentTools([]);
       setStatusMessage('');
       setCurrentStatusType('default');
@@ -142,11 +144,42 @@ export const Chat: React.FC<ChatProps> = ({
       case 'llm_start':
         setStatusMessage('Thinking');
         setCurrentStatusType('thinking');
+        setIsStreaming(false);
+        break;
+
+      case 'llm_stream_chunk':
+        setMessages((prev) => {
+          const lastMsg = prev[prev.length - 1];
+
+          // If last message is assistant, append chunk to it
+          // (This means we're already streaming to this message)
+          if (lastMsg?.role === 'assistant') {
+            return [
+              ...prev.slice(0, -1),
+              { ...lastMsg, content: lastMsg.content + event.chunk }
+            ];
+          }
+
+          // Otherwise, start new streaming message
+          return [...prev, { role: 'assistant', content: event.chunk }];
+        });
+        setIsStreaming(true);
         break;
 
       case 'llm_response':
+        // Mark streaming as complete
+        setIsStreaming(false);
+        // Only add message if not already streaming (backward compatibility)
         if (event.content) {
-          setMessages((prev) => [...prev, { role: 'assistant', content: event.content }]);
+          setMessages((prev) => {
+            const lastMsg = prev[prev.length - 1];
+            // If last message is assistant, it was streamed - don't duplicate
+            if (lastMsg?.role === 'assistant') {
+              return prev;
+            }
+            // Otherwise add the complete message
+            return [...prev, { role: 'assistant', content: event.content }];
+          });
         }
         break;
 

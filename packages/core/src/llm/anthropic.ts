@@ -102,41 +102,125 @@ export class AnthropicClient extends LLMClient {
   /**
    * Stream message response from Claude
    *
-   * TODO: Implement streaming for real-time updates in the terminal UI
-   * This requires handling Anthropic's streaming API and yielding chunks progressively.
-   *
-   * Example flow:
-   * 1. Call client.messages.stream()
-   * 2. Listen for events: text, tool_use, message_stop
-   * 3. Yield StreamChunk objects for each event
+   * Uses Anthropic's streaming API to yield chunks progressively.
    */
   async *streamMessage(
     messages: LLMMessage[],
     tools?: Tool[]
   ): AsyncGenerator<StreamChunk, void, unknown> {
-    // TODO: Implement streaming
-    // For now, fall back to non-streaming and yield the final result
-    const response = await this.sendMessage(messages, tools);
+    try {
+      // Separate system messages from conversation
+      const systemMessages = messages.filter((m) => m.role === 'system');
+      const conversationMessages = messages.filter((m) => m.role !== 'system');
 
-    if (response.content) {
-      yield {
-        type: 'text',
-        content: response.content,
+      // Combine system messages into one
+      const systemPrompt = systemMessages
+        .map((m) => (typeof m.content === 'string' ? m.content : ''))
+        .join('\n\n');
+
+      // Convert messages to Anthropic format
+      const anthropicMessages = conversationMessages.map((msg) => ({
+        role: msg.role as 'user' | 'assistant',
+        content: typeof msg.content === 'string' ? msg.content : msg.content,
+      }));
+
+      // Prepare request parameters
+      const params: Anthropic.MessageStreamParams = {
+        model: this.model,
+        max_tokens: this.maxTokens,
+        temperature: this.temperature,
+        messages: anthropicMessages,
       };
-    }
 
-    if (response.toolCalls) {
-      for (const toolCall of response.toolCalls) {
+      if (systemPrompt) {
+        params.system = systemPrompt;
+      }
+
+      if (tools && tools.length > 0) {
+        params.tools = this.convertToolsToProviderFormat(tools) as Anthropic.Tool[];
+      }
+
+      // Start streaming
+      const stream = await this.client.messages.stream(params);
+
+      // Track current content block for tool calls
+      let currentToolBlock: { id: string; name: string; input: Record<string, unknown> } | null =
+        null;
+
+      // Process stream events
+      for await (const event of stream) {
+        if (event.type === 'content_block_delta') {
+          // Text delta
+          if (event.delta.type === 'text_delta') {
+            yield {
+              type: 'text',
+              content: event.delta.text,
+            };
+          } else if (event.delta.type === 'input_json_delta') {
+            // Tool input is being streamed (accumulate it)
+            // We'll yield the complete tool call when the block stops
+          }
+        } else if (event.type === 'content_block_start') {
+          // Tool use start
+          if (event.content_block.type === 'tool_use') {
+            currentToolBlock = {
+              id: event.content_block.id,
+              name: event.content_block.name,
+              input: event.content_block.input as Record<string, unknown>,
+            };
+          }
+        } else if (event.type === 'content_block_stop') {
+          // If we were tracking a tool block, yield it now
+          if (currentToolBlock) {
+            yield {
+              type: 'tool_use',
+              toolCall: currentToolBlock,
+            };
+            currentToolBlock = null;
+          }
+        }
+      }
+
+      // Get final message for usage tracking and any remaining tool calls
+      const finalMessage = await stream.finalMessage();
+
+      // Track usage
+      this.lastUsage = {
+        inputTokens: finalMessage.usage.input_tokens,
+        outputTokens: finalMessage.usage.output_tokens,
+      };
+
+      for (const block of finalMessage.content) {
+        if (block.type === 'tool_use' && !currentToolBlock) {
+          // Yield any tool calls we might have missed
+          yield {
+            type: 'tool_use',
+            toolCall: {
+              id: block.id,
+              name: block.name,
+              input: block.input as Record<string, unknown>,
+            },
+          };
+        }
+      }
+
+      // Stream completed successfully
+      yield {
+        type: 'done',
+      };
+    } catch (error) {
+      if (error instanceof Error) {
         yield {
-          type: 'tool_use',
-          toolCall,
+          type: 'error',
+          error: `Anthropic streaming error: ${error.message}`,
+        };
+      } else {
+        yield {
+          type: 'error',
+          error: 'Unknown streaming error',
         };
       }
     }
-
-    yield {
-      type: 'done',
-    };
   }
 
   /**

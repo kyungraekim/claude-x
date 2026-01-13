@@ -311,7 +311,7 @@ The following features are marked as TODOs in the codebase:
 - [ ] Rate limiting and retry logic for LLM API calls
 - [ ] Conversation history pruning and token management
 - [ ] Tool sandboxing and security restrictions
-- [ ] Streaming LLM responses in terminal UI
+- [x] Streaming LLM responses in terminal UI ✅
 
 ### Medium Priority
 

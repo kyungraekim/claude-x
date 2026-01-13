@@ -117,41 +117,96 @@ export class OllamaClient extends LLMClient {
   /**
    * Stream message response from Ollama
    *
-   * TODO: Implement streaming for real-time updates in the terminal UI
-   * This requires handling Ollama's streaming API and yielding chunks progressively.
-   *
-   * Example flow:
-   * 1. Call client.chat({ stream: true })
-   * 2. Listen for response chunks
-   * 3. Yield StreamChunk objects for each chunk
+   * Uses Ollama's streaming API to yield chunks progressively.
    */
   async *streamMessage(
     messages: LLMMessage[],
     tools?: Tool[]
   ): AsyncGenerator<StreamChunk, void, unknown> {
-    // TODO: Implement streaming
-    // For now, fall back to non-streaming and yield the final result
-    const response = await this.sendMessage(messages, tools);
+    try {
+      // Convert messages to Ollama format
+      const ollamaMessages: Message[] = messages.map((msg) => {
+        const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+        return {
+          role: msg.role as 'system' | 'user' | 'assistant',
+          content,
+        };
+      });
 
-    if (response.content) {
-      yield {
-        type: 'text',
-        content: response.content,
+      // Prepare request parameters
+      const params: ChatRequest & { stream: true } = {
+        model: this.model,
+        messages: ollamaMessages,
+        stream: true, // Enable streaming
+        options: {
+          temperature: this.temperature,
+          num_predict: this.maxTokens,
+        },
       };
-    }
 
-    if (response.toolCalls) {
-      for (const toolCall of response.toolCalls) {
+      // Add tools if provided
+      if (tools && tools.length > 0) {
+        params.tools = this.convertToolsToProviderFormat(tools).map((tool) =>
+          this.toOllamaTool(tool)
+        );
+      }
+
+      // Start streaming
+      const stream = await this.client.chat(params);
+
+      // Track tool calls
+      const toolCalls: ToolCall[] = [];
+
+      // Process stream chunks
+      for await (const chunk of stream) {
+        // Handle text content
+        if (chunk.message?.content) {
+          yield {
+            type: 'text',
+            content: chunk.message.content,
+          };
+        }
+
+        // Handle tool calls
+        if (chunk.message?.tool_calls && chunk.message.tool_calls.length > 0) {
+          for (const toolCall of chunk.message.tool_calls) {
+            const input = this.getToolInput(toolCall);
+            toolCalls.push({
+              id: toolCall.function?.name || `tool_${Date.now()}`,
+              name: toolCall.function?.name || '',
+              input,
+            });
+          }
+        }
+      }
+
+      // Yield accumulated tool calls
+      for (const toolCall of toolCalls) {
+        if (toolCall.name) {
+          yield {
+            type: 'tool_use',
+            toolCall,
+          };
+        }
+      }
+
+      // Stream completed successfully
+      yield {
+        type: 'done',
+      };
+    } catch (error) {
+      if (error instanceof Error) {
         yield {
-          type: 'tool_use',
-          toolCall,
+          type: 'error',
+          error: `Ollama streaming error: ${error.message}`,
+        };
+      } else {
+        yield {
+          type: 'error',
+          error: 'Unknown streaming error',
         };
       }
     }
-
-    yield {
-      type: 'done',
-    };
   }
 
   /**

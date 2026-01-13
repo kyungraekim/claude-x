@@ -133,36 +133,69 @@ export class Agent {
       };
 
       try {
-        const response = await this.llm.sendMessage(
+        // Stream LLM response
+        let fullContent = '';
+        const toolCalls: Array<{ id: string; name: string; input: Record<string, unknown> }> = [];
+        let streamError: string | null = null;
+
+        // Process streaming chunks
+        for await (const chunk of this.llm.streamMessage(
           this.state.messages,
           this.config.tools
-        );
+        )) {
+          if (chunk.type === 'text' && chunk.content) {
+            fullContent += chunk.content;
+            // Yield streaming chunk event for UI
+            yield {
+              type: 'llm_stream_chunk',
+              chunk: chunk.content,
+              iteration: this.state.iterationCount,
+            };
+          } else if (chunk.type === 'tool_use' && chunk.toolCall) {
+            toolCalls.push(chunk.toolCall);
+          } else if (chunk.type === 'error') {
+            streamError = chunk.error || 'Unknown streaming error';
+            break;
+          }
+          // 'done' chunk signals end of stream
+        }
 
-        // Update token usage
-        if (response.usage) {
-          this.state.tokenUsage!.input += response.usage.inputTokens;
-          this.state.tokenUsage!.output += response.usage.outputTokens;
+        // Handle stream errors
+        if (streamError) {
+          yield {
+            type: 'error',
+            error: streamError,
+          };
+          break;
+        }
+
+        // Track token usage from streaming
+        const usage = this.llm.getLastUsage();
+        if (usage) {
+          this.state.tokenUsage!.input += usage.inputTokens;
+          this.state.tokenUsage!.output += usage.outputTokens;
+          this.llm.resetLastUsage();
         }
 
         // Add assistant message to history
         this.state.messages.push({
           role: 'assistant',
-          content: response.content,
+          content: fullContent,
         });
 
-        // Yield response
-        if (response.content) {
+        // Yield complete response (for backward compatibility and final state)
+        if (fullContent) {
           yield {
             type: 'llm_response',
-            content: response.content,
+            content: fullContent,
             iteration: this.state.iterationCount,
           };
         }
 
         // Check for tool calls
-        if (response.toolCalls && response.toolCalls.length > 0) {
+        if (toolCalls.length > 0) {
           // Execute each tool
-          for (const toolCall of response.toolCalls) {
+          for (const toolCall of toolCalls) {
             yield {
               type: 'tool_start',
               toolCall,
@@ -197,30 +230,12 @@ export class Agent {
           continue;
         }
 
-        // No tool calls - check stop reason
-        if (response.stopReason === 'end_turn' || response.stopReason === 'stop_sequence') {
-          // Natural end of conversation
-          yield {
-            type: 'done',
-            finalMessage: response.content,
-          };
-          break;
-        }
-
-        if (response.stopReason === 'max_tokens') {
-          logger.warn('LLM hit max tokens limit');
-          // Continue to next iteration
-          continue;
-        }
-
-        // If we get here with no tool calls and no end_turn, something's wrong
-        if (response.stopReason === 'error') {
-          yield {
-            type: 'error',
-            error: 'LLM returned error stop reason',
-          };
-          break;
-        }
+        // No tool calls - stream completed successfully, we're done
+        yield {
+          type: 'done',
+          finalMessage: fullContent,
+        };
+        break;
 
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -249,24 +264,6 @@ export class Agent {
     });
   }
 
-  /**
-   * Run with streaming (TODO)
-   *
-   * TODO: Implement streaming LLM responses
-   * This requires using llm.streamMessage() and yielding chunks progressively
-   *
-   * @param userMessage - User's message
-   * @param options - Execution options
-   * @returns Async generator of agent events
-   */
-  async *runStreaming(
-    userMessage: string,
-    options: AgentExecutionOptions = {}
-  ): AsyncGenerator<AgentEvent, void, unknown> {
-    // TODO: Implement streaming version
-    // For now, fall back to non-streaming
-    yield* this.run(userMessage, options);
-  }
 
   /**
    * Get current state
