@@ -8,7 +8,7 @@ import { Box, Text } from 'ink';
 import TextInput from 'ink-text-input';
 import React, { useEffect, useState } from 'react';
 import type { Agent, AgentEvent, ToolCall, ToolResult } from '@claude-x/core';
-import { CommandRegistry, ExportCommand } from '../../commands/index.js';
+import { ClearCommand, CommandRegistry, ExportCommand, ResetCommand } from '../../commands/index.js';
 import type { CommandContext } from '../../types/command.js';
 import { parseSlashCommand } from '../../commands/command-parser.js';
 import { LOGO_IMAGE } from '../assets/images/logo.image.js';
@@ -48,6 +48,8 @@ export const Chat: React.FC<ChatProps> = ({ agent, initialMessage }) => {
   const [commandRegistry] = useState(() => {
     const registry = new CommandRegistry();
     registry.register(ExportCommand);
+    registry.register(ResetCommand);
+    registry.register(ClearCommand);
     return registry;
   });
 
